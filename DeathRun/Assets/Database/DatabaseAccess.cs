@@ -2,10 +2,17 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class DatabaseAccess : MonoBehaviour
 {
+    public class UserInform
+    {
+        public string Id { get; set; }
+        public string Password { get; set; }
+    }
+
     MongoClient client = new MongoClient("mongodb+srv://testUser:testPassword@cluster0.2pzu3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
     IMongoDatabase database;
     IMongoCollection<BsonDocument> collection;
@@ -16,9 +23,27 @@ public class DatabaseAccess : MonoBehaviour
         collection = database.GetCollection<BsonDocument>("LoginCollection");
     }
 
-    public async void SaveUserInformToDataBase(string id, string password, string nickname)
+    public async Task<Define.AccountCreationStatus> SaveNewAccountToDataBase(string id, string password, string nickname)
     {
-        var document = new BsonDocument() { 
+        List<UserInform> userInforms = new List<UserInform>();
+
+        FilterDefinition<BsonDocument> filterById = Builders<BsonDocument>.Filter.Eq("Id", id);
+        List<BsonDocument> resultsById = await collection.Find(filterById).ToListAsync();
+
+        if (resultsById.Count != 0)
+        {
+            return Define.AccountCreationStatus.DuplicateId;
+        }
+
+        FilterDefinition<BsonDocument> filterBynickName = Builders<BsonDocument>.Filter.Eq("Nickname", nickname);
+        List<BsonDocument> resultsBynickName = await collection.Find(filterBynickName).ToListAsync();
+
+        if (resultsBynickName.Count != 0)
+        {
+            return Define.AccountCreationStatus.DuplicateNickname;
+        }
+
+        var document = new BsonDocument() {
             { "Id", id },
             {"Password", password },
             {"Nickname", nickname }
@@ -26,42 +51,37 @@ public class DatabaseAccess : MonoBehaviour
         await collection.InsertOneAsync(document);
         //컬렉션 갱신
         collection = database.GetCollection<BsonDocument>("LoginCollection");
+
+        return Define.AccountCreationStatus.Success;
     }
 
-    public bool CheckUserInformsFromDataBase(string id, string password)
+    public async Task<Define.LoginStatus> CheckUserInformsFromDataBase(string id, string password)
     {
         List<UserInform> userInforms = new List<UserInform>();
 
-        FilterDefinition<BsonDocument> filter = Builders<BsonDocument>.Filter.Eq("Id", id);
-        List<BsonDocument> results = collection.Find(filter).ToList();
+        FilterDefinition<BsonDocument> filterById = Builders<BsonDocument>.Filter.Eq("Id", id);
+        List<BsonDocument> resultsById = await collection.Find(filterById).ToListAsync();
 
-        if (results.Count == 0)
+        if (resultsById.Count == 0)
         {
-            Debug.Log("아이디를 찾을 수 없습니다.");
-            return false;
+            return Define.LoginStatus.IDNotFound;
         }
 
-        foreach (BsonDocument result in results)
+        foreach (BsonDocument result in resultsById)
         {
             UserInform userInform = new UserInform();
-            if(password == result.GetElement("Password").Value.ToString())
+            if (password == result.GetElement("Password").Value.ToString())
             {
-                return true;
+                return Define.LoginStatus.Success;
             }
         }
 
-        return false;
+        return Define.LoginStatus.PasswordNotFound;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
-    }
-}
 
-public class UserInform
-{
-    public string Id { get; set; }
-    public string Password { get; set; }
+    }
 }
