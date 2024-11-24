@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -57,14 +58,16 @@ public class AuthManager : MonoBehaviour
 
     public async void TryLogin()
     {
-        Define.LoginStatus loginStatus = await dataBaseAccess.CheckUserInformsFromDataBase(idText.text, passwordText.text);
+        var (loginStatus, nickname) = await dataBaseAccess.CheckUserInformsFromDataBase(idText.text, passwordText.text);
 
         switch (loginStatus)
         {
             case Define.LoginStatus.Success:
                 Debug.Log("로그인 정보를 찾았습니다!");
+                PhotonInit.Instance.SetPlayerName(nickname);
                 txtIDNotFoundWarning.text = string.Empty;
                 txtPasswordNotFoundWarning.text = string.Empty;
+                TitlePanel.SetActive(false);
                 break;
             case Define.LoginStatus.IDNotFound:
                 txtPasswordNotFoundWarning.text = string.Empty;

@@ -55,7 +55,7 @@ public class DatabaseAccess : MonoBehaviour
         return Define.AccountCreationStatus.Success;
     }
 
-    public async Task<Define.LoginStatus> CheckUserInformsFromDataBase(string id, string password)
+    public async Task<(Define.LoginStatus, string)> CheckUserInformsFromDataBase(string id, string password)
     {
         List<UserInform> userInforms = new List<UserInform>();
 
@@ -64,7 +64,7 @@ public class DatabaseAccess : MonoBehaviour
 
         if (resultsById.Count == 0)
         {
-            return Define.LoginStatus.IDNotFound;
+            return (Define.LoginStatus.IDNotFound, null);
         }
 
         foreach (BsonDocument result in resultsById)
@@ -72,11 +72,12 @@ public class DatabaseAccess : MonoBehaviour
             UserInform userInform = new UserInform();
             if (password == result.GetElement("Password").Value.ToString())
             {
-                return Define.LoginStatus.Success;
+                string nickname = result.GetElement("Nickname").Value.ToString();
+                return (Define.LoginStatus.Success, nickname);
             }
         }
 
-        return Define.LoginStatus.PasswordNotFound;
+        return (Define.LoginStatus.PasswordNotFound, null);
     }
 
     // Update is called once per frame

@@ -20,7 +20,6 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     bool isLoggIn = false;
     bool isReady = false;
     string playerName = "";
-    string connectionState = "";
     public string chatMessage;
     Text chatText;
     ScrollRect scroll_rect = null;
@@ -30,10 +29,10 @@ public class PhotonInit : MonoBehaviourPunCallbacks
 
     [Header("LobbyCanvas")] public GameObject LobbyCanvas;
     public GameObject LobbyPanel;
-    public GameObject MakeRoomPanel;
+    public GameObject CreateRoomPanel;
     public GameObject RoomPanel;
-    public InputField RoomInput;
-    public InputField RoomPwInput;
+    public InputField NewRoomNameIF;
+    public InputField NewRoomPwInput;
     public Toggle PwToggle;
     public GameObject PwPanel;
     public GameObject PwErrorLog;
@@ -48,17 +47,15 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     public Button CreateRoomBtn;
     public int hashtablecount;
 
-    // �������� �� ����Ʈ�� �����ϴ� ����
     List<RoomInfo> myList = new List<RoomInfo>();
     int currentPage = 1, maxPage, multiple, roomnumber;
 
     private void Awake()
     {
 
-        PhotonNetwork.GameVersion = "MyFps 1.0";
+        PhotonNetwork.GameVersion = "MyFps";
         PhotonNetwork.ConnectUsingSettings();
 
-        // ���� 2���� ������ �ε��� �Ǳ⶧���� UI ó���� �غ���
         if (GameObject.Find("ChatText") != null)
             chatText = GameObject.Find("ChatText").GetComponent<Text>();
 
@@ -67,12 +64,6 @@ public class PhotonInit : MonoBehaviourPunCallbacks
 
         if (GameObject.Find("ConnectionInfoText") != null)
             connectionInfoText = GameObject.Find("ConnectionInfoText").GetComponent<Text>();
-
-        connectionState = "������ ������ ���� ��...";
-
-        if (connectionInfoText)
-            connectionInfoText.text = connectionState;
-        //�Ʒ��� �Լ��� ����Ͽ� ���� ��ȯ �Ǵ��� ���� �Ǿ��� �ν��Ͻ��� �ı����� �ʴ´�.
 
         DontDestroyOnLoad(gameObject);
     }
@@ -93,8 +84,6 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         }
     }
 
-
-
     public override void OnJoinedLobby()
     {
         base.OnJoinedLobby();
@@ -109,24 +98,12 @@ public class PhotonInit : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsConnected && isReady)
         {
-            connectionState = "�뿡 ����...";
-            if (connectionInfoText)
-                connectionInfoText.text = connectionState;
-
-            LobbyPanel.SetActive(false);
             RoomPanel.SetActive(true);
 
-
             PhotonNetwork.JoinLobby();
-            //���� ������ ���� �Ǹ� �κ� ����! ���� �����ϰ� ���°Ŵ� ���� ����!
-            //��� ���� ��Ȳ�� �����ִ� �г��� �����ش�
-            //PhotonNetwork.JoinRandomRoom();
         }
         else
         {
-            connectionState = "�������� : ������ ������ ������� ����\n���� ��õ���...";
-            if (connectionInfoText)
-                connectionInfoText.text = connectionState;
             PhotonNetwork.ConnectUsingSettings();
         }
 
@@ -134,22 +111,14 @@ public class PhotonInit : MonoBehaviourPunCallbacks
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        connectionState = "No Room";
-        if (connectionInfoText)
-            connectionInfoText.text = connectionState;
         Debug.Log("No Room");
         //����� �κе� �ּ� ó��
         //PhotonNetwork.CreateRoom("MyRoom");
     }
 
-
-
     public override void OnCreatedRoom()
     {
         base.OnCreatedRoom();
-        connectionState = "Finish make a room";
-        if (connectionInfoText)
-            connectionInfoText.text = connectionState;
         Debug.Log("Finish make a room");
 
     }
@@ -160,23 +129,15 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         Debug.Log("OnCreateRoomFailed:" + returnCode + "-" + message);
     }
 
-
-
     public override void OnJoinedRoom()
     {
         base.OnJoinedRoom();
-        connectionState = "Joined Room";
-        if (connectionInfoText)
-            connectionInfoText.text = connectionState;
         Debug.Log("Joined Room");
         isLoggIn = true;
         PlayerPrefs.SetInt("LogIn", 1);
 
         //SceneManager.LoadScene("SampleScene");
         PhotonNetwork.LoadLevel("SampleScene");
-
-
-
     }
 
     private void OnApplicationQuit()
@@ -206,56 +167,39 @@ public class PhotonInit : MonoBehaviourPunCallbacks
             if (GameObject.Find("ChattingButton") != null)
             {
                 chattingBtn = GameObject.Find("ChattingButton").GetComponent<Button>();
-                chattingBtn.onClick.AddListener(SetPlayerName);
+                //chattingBtn.onClick.AddListener(SetPlayerName);
             }
 
 
-            //StartCoroutine(CreatePlayer());
+            StartCoroutine(CreatePlayer());
         }
     }
 
-    //IEnumerator CreatePlayer()
-    //{
-    //    while (!isGameStart)
-    //    {
-    //        yield return new WaitForSeconds(0.5f);
-    //    }
-
-    //    GameObject tempPlayer = PhotonNetwork.Instantiate("PlayerDagger",
-    //                                new Vector3(0, 0, 0),
-    //                                Quaternion.identity,
-    //                                0);
-    //    tempPlayer.GetComponent<PlayerCtrl>().SetPlayerName(playerName);
-    //    pv = GetComponent<PhotonView>();
-
-    //    yield return null;
-    //}
-
-    private void OnGUI()
+    IEnumerator CreatePlayer()
     {
-        GUILayout.Label(connectionState);
+        while (!isGameStart)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        GameObject tempPlayer = PhotonNetwork.Instantiate("TempPlayer",
+                                    new Vector3(0, 0, 0),
+                                    Quaternion.identity,
+                                    0);
+        tempPlayer.GetComponent<TempPlayerCtrl>().SetPlayerName(playerName); //플레이어 이름 할당
+        pv = GetComponent<PhotonView>();
+
+        yield return null;
     }
 
-    public void SetPlayerName()
+    public void SetPlayerName(string _playerName)
     {
-        Debug.Log(playerInput.text + "�� �Է� �ϼ̽��ϴ�!" + isGameStart + ", " + isLoggIn);
-
         if (isGameStart == false && isLoggIn == false)
         {
-            playerName = playerInput.text;
-            playerInput.text = string.Empty;
-            Debug.Log("connect �õ�!" + isGameStart + ", " + isLoggIn);
+            playerName = _playerName;
             Connect();
 
         }
-        else
-        {
-            chatMessage = playerInput.text;
-            playerInput.text = string.Empty;
-            //ShowChat(chatMessage);
-            pv.RPC("ChatInfo", RpcTarget.All, chatMessage);
-        }
-
     }
 
     public void ShowChat(string chat)
@@ -278,17 +222,17 @@ public class PhotonInit : MonoBehaviourPunCallbacks
 
     public void CreateRoomBtnOnClick()
     {
-        MakeRoomPanel.SetActive(true);
+        CreateRoomPanel.SetActive(true);
     }
 
     public void OKBtnOnClick()
     {
-        MakeRoomPanel.SetActive(false);
+        CreateRoomPanel.SetActive(false);
     }
 
     public void CreateRoom()
     {
-        PhotonNetwork.CreateRoom(RoomInput.text == "" ? "Game" + Random.Range(0, 20) : RoomInput.text,
+        PhotonNetwork.CreateRoom(NewRoomNameIF.text == "" ? "Game" + Random.Range(0, 20) : NewRoomNameIF.text,
                new RoomOptions { MaxPlayers = 20 });
         LobbyPanel.SetActive(false);
     }
@@ -298,9 +242,6 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         PhotonNetwork.Disconnect();
         RoomPanel.SetActive(false);
         LobbyPanel.SetActive(true);
-        connectionState = "������ ������ ���� ��...";
-        if (connectionInfoText)
-            connectionInfoText.text = connectionState;
         isGameStart = false;
         isLoggIn = false;
         PlayerPrefs.SetInt("LogIn", 0);
@@ -308,32 +249,27 @@ public class PhotonInit : MonoBehaviourPunCallbacks
 
     public void CreateNewRoom()
     {
-
         RoomOptions roomOptions = new RoomOptions();
         roomOptions.MaxPlayers = 20;
         roomOptions.CustomRoomProperties = new Hashtable()
         {
-            {"password", RoomPwInput.text}
+            {"password", NewRoomPwInput.text}
         };
         roomOptions.CustomRoomPropertiesForLobby = new string[] { "password" };
 
         if (PwToggle.isOn)
         {
-            PhotonNetwork.CreateRoom(RoomInput.text == "" ? "Game" + Random.Range(0, 20) : "*" + RoomInput.text,
+            PhotonNetwork.CreateRoom(NewRoomNameIF.text == "" ? "Game" + Random.Range(0, 20) : "*" + NewRoomNameIF.text,
                 roomOptions);
         }
-
         else
         {
-            PhotonNetwork.CreateRoom(RoomInput.text == "" ? "Game" + Random.Range(0, 20) : RoomInput.text,
+            PhotonNetwork.CreateRoom(NewRoomNameIF.text == "" ? "Game" + Random.Range(0, 20) : NewRoomNameIF.text,
                 new RoomOptions { MaxPlayers = 20 });
         }
 
-        MakeRoomPanel.SetActive(false);
+        CreateRoomPanel.SetActive(false);
         //LobbyCanvas.SetActive(false);
-
-
-
     }
 
     public void MyListClick(int num)
