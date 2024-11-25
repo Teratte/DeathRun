@@ -65,16 +65,20 @@ public class AuthManager : MonoBehaviour
             case Define.LoginStatus.Success:
                 Debug.Log("로그인 정보를 찾았습니다!");
                 PhotonInit.Instance.SetPlayerName(nickname);
+                idText.text = string.Empty;
+                passwordText.text = string.Empty;
                 txtIDNotFoundWarning.text = string.Empty;
                 txtPasswordNotFoundWarning.text = string.Empty;
                 TitlePanel.SetActive(false);
                 break;
             case Define.LoginStatus.IDNotFound:
                 txtPasswordNotFoundWarning.text = string.Empty;
+                idText.text = string.Empty;
                 txtIDNotFoundWarning.text = "아이디를 찾지 못했습니다.";
                 break;
             case Define.LoginStatus.PasswordNotFound:
                 txtIDNotFoundWarning.text = string.Empty;
+                passwordText.text = string.Empty;
                 txtPasswordNotFoundWarning.text = "비밀번호가 틀립니다.";
                 break;
         }

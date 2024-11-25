@@ -12,23 +12,15 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     // �̱��� ������ ������ �ؾ� ��
     public static PhotonInit instance;
 
-    public InputField playerInput;
-    public Button chattingBtn;
-
-
     bool isGameStart = false;
     bool isLoggIn = false;
     bool isReady = false;
     string playerName = "";
     public string chatMessage;
-    Text chatText;
-    ScrollRect scroll_rect = null;
     PhotonView pv;
 
-    Text connectionInfoText;
-
     [Header("LobbyCanvas")] public GameObject LobbyCanvas;
-    public GameObject LobbyPanel;
+    public GameObject TitlePanel;
     public GameObject CreateRoomPanel;
     public GameObject RoomPanel;
     public InputField NewRoomNameIF;
@@ -44,26 +36,17 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     public Button[] CellBtn;
     public Button PreviousBtn;
     public Button NextBtn;
-    public Button CreateRoomBtn;
-    public int hashtablecount;
+    public Text NickName;
 
     List<RoomInfo> myList = new List<RoomInfo>();
     int currentPage = 1, maxPage, multiple, roomnumber;
 
     private void Awake()
     {
+        Screen.SetResolution(960, 540, false);
 
         PhotonNetwork.GameVersion = "MyFps";
         PhotonNetwork.ConnectUsingSettings();
-
-        if (GameObject.Find("ChatText") != null)
-            chatText = GameObject.Find("ChatText").GetComponent<Text>();
-
-        if (GameObject.Find("Scroll View") != null)
-            scroll_rect = GameObject.Find("Scroll View").GetComponent<ScrollRect>();
-
-        if (GameObject.Find("ConnectionInfoText") != null)
-            connectionInfoText = GameObject.Find("ConnectionInfoText").GetComponent<Text>();
 
         DontDestroyOnLoad(gameObject);
     }
@@ -92,21 +75,26 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         //PhotonNetwork.JoinRandomRoom();
         //PhotonNetwork.JoinRoom("MyRoom");
     }
+    
+    public override void OnConnectedToMaster()
+    {
+        Debug.Log("OnConnectedToServer");
+        isReady = true;
+    }
 
     public void Connect()
     {
 
         if (PhotonNetwork.IsConnected && isReady)
         {
-            RoomPanel.SetActive(true);
-
             PhotonNetwork.JoinLobby();
+            NickName.text = playerName;
+            RoomPanel.SetActive(true);
         }
         else
         {
             PhotonNetwork.ConnectUsingSettings();
         }
-
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -154,22 +142,6 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         {
             Debug.Log("Update :" + isGameStart + ", " + isLoggIn);
             isGameStart = true;
-            if (GameObject.Find("ChatText") != null)
-                chatText = GameObject.Find("ChatText").GetComponent<Text>();
-
-            if (GameObject.Find("Scroll View") != null)
-                scroll_rect = GameObject.Find("Scroll View").GetComponent<ScrollRect>();
-
-            // ���� �÷��̾� ��ǲ �ʵ带 ��ü����
-            if (GameObject.Find("InputFieldChat") != null)
-                playerInput = GameObject.Find("InputFieldChat").GetComponent<InputField>();
-
-            if (GameObject.Find("ChattingButton") != null)
-            {
-                chattingBtn = GameObject.Find("ChattingButton").GetComponent<Button>();
-                //chattingBtn.onClick.AddListener(SetPlayerName);
-            }
-
 
             StartCoroutine(CreatePlayer());
         }
@@ -197,27 +169,10 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         if (isGameStart == false && isLoggIn == false)
         {
             playerName = _playerName;
+            PhotonNetwork.LocalPlayer.NickName = playerName;
             Connect();
 
         }
-    }
-
-    public void ShowChat(string chat)
-    {
-        chatText.text += chat + "\n";
-        scroll_rect.verticalNormalizedPosition = 0.0f;
-    }
-
-    [PunRPC]
-    public void ChatInfo(string sChat)
-    {
-        ShowChat(sChat);
-    }
-
-    public override void OnConnectedToMaster()
-    {
-        Debug.Log("OnConnectedToServer");
-        isReady = true;
     }
 
     public void CreateRoomBtnOnClick()
@@ -234,17 +189,19 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     {
         PhotonNetwork.CreateRoom(NewRoomNameIF.text == "" ? "Game" + Random.Range(0, 20) : NewRoomNameIF.text,
                new RoomOptions { MaxPlayers = 20 });
-        LobbyPanel.SetActive(false);
+        TitlePanel.SetActive(false);
     }
 
     public void Disconnect()
     {
         PhotonNetwork.Disconnect();
         RoomPanel.SetActive(false);
-        LobbyPanel.SetActive(true);
+        TitlePanel.SetActive(true);
         isGameStart = false;
         isLoggIn = false;
+        isReady = false;
         PlayerPrefs.SetInt("LogIn", 0);
+        PhotonNetwork.ConnectUsingSettings();
     }
 
     public void CreateNewRoom()
@@ -285,7 +242,6 @@ public class PhotonInit : MonoBehaviourPunCallbacks
             ++currentPage;
             MyListRenewal();
         }
-
         else if (myList[multiple + num].CustomProperties["password"] != null)
         {
             PwPanel.SetActive(true);
@@ -319,8 +275,6 @@ public class PhotonInit : MonoBehaviourPunCallbacks
             default:
                 break;
         }
-
-
     }
 
     public void EnterRoomWithPW()
@@ -331,13 +285,10 @@ public class PhotonInit : MonoBehaviourPunCallbacks
             MyListRenewal();
             PwPanel.SetActive(false);
         }
-
         else
         {
             StartCoroutine("ShowPwWrongMsg");
         }
-
-
     }
 
     IEnumerator ShowPwWrongMsg()
@@ -387,5 +338,4 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         MyListRenewal();
 
     }
-
 }
