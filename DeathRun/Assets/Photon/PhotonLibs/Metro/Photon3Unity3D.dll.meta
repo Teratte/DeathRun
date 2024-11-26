@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 3b5a0a7dce46a13459199d174ad3db3f
+guid: 874800e29c52ab046bed182952e7f9e5
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -12,30 +12,22 @@ PluginImporter:
   validateReferences: 1
   platformData:
   - first:
-      '': Any
+      Any: 
     second:
       enabled: 1
       settings: {}
   - first:
-      '': WP8
+      Editor: Editor
     second:
-      enabled: 1
+      enabled: 0
       settings:
-        CPU: AnyCPU
-        DontProcess: False
-        PlaceholderPath: Assets/Photon/PhotonLibs/Photon3Unity3D.dll
-        SDK: AnySDK
-        ScriptingBackend: DotNet
+        DefaultValueInitialized: true
   - first:
       Windows Store Apps: WindowsStoreApps
     second:
-      enabled: 1
+      enabled: 0
       settings:
         CPU: AnyCPU
-        DontProcess: false
-        PlaceholderPath: Assets/Photon/PhotonLibs/Photon3Unity3D.dll
-        SDK: AnySDK
-        ScriptingBackend: DotNet
   userData: 
   assetBundleName: 
   assetBundleVariant: 

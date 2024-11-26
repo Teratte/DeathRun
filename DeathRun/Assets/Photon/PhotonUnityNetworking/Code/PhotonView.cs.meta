@@ -1,10 +1,5 @@
 fileFormatVersion: 2
-guid: aa584fbee541324448dd18d8409c7a41
-labels:
-- ExitGames
-- PUN
-- Photon
-- Networking
+guid: bd9b2868a5613084d9878428b9ebdbe9
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
