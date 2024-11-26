@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 4345225956e176043b2f73b9ee1b0f2b
+guid: b846b6125c8a612458e1fa7adf14debd
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -8,11 +8,9 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: eurofurence light
   fontNames:
   - eurofurence light
-  fallbackFontReferences:
-  - {fileID: 12800000, guid: 954746d370bc8934299c8c8267543f4f, type: 3}
+  fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1
