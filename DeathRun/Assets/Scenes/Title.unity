@@ -389,7 +389,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 77629510}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9115eaf3a70f8fa4db95bd35381bad49, type: 3}
+  m_Script: {fileID: 11500000, guid: ccfcce3cc6ab54b41869d8b8589a02e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   chatMessage: 
@@ -403,7 +403,7 @@ MonoBehaviour:
   PwPanel: {fileID: 1465106831}
   PwErrorLog: {fileID: 127737128}
   PwConfirmBtn: {fileID: 138321852}
-  PwPanelCloseBtn: {fileID: 1287204244}
+  PwPanelCloseBtn: {fileID: 0}
   PwCheckIF: {fileID: 442453564}
   LockState: 0
   privateroom: 
@@ -1731,7 +1731,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 346349286}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b03436f46c408ad4ba8f70e06b9ec1cd, type: 3}
+  m_Script: {fileID: 11500000, guid: dd87e4ba76b19cb42a4209a94fe1369b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &365784687
@@ -2521,7 +2521,7 @@ GameObject:
   - component: {fileID: 535795224}
   - component: {fileID: 535795223}
   m_Layer: 5
-  m_Name: NickNameInputField
+  m_Name: CreateNickNameIF
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2974,7 +2974,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 594305519}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b03436f46c408ad4ba8f70e06b9ec1cd, type: 3}
+  m_Script: {fileID: 11500000, guid: dd87e4ba76b19cb42a4209a94fe1369b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &594305521
@@ -5630,7 +5630,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1343562874}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8358678911b221a4583ad81e95a2f69e, type: 3}
+  m_Script: {fileID: 11500000, guid: 7c95b5822f497e34fb8d03107a2a361e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   dataBaseAccess: {fileID: 346349288}
