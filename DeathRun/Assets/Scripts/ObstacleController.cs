@@ -18,7 +18,7 @@ public class ObstacleController : MonoBehaviour
         {
             // 오른쪽으로 날려버림
             obstacleRenderer.material.color = Color.green; // 색상 변경
-            rb.AddForce(Vector3.right * 5f, ForceMode.Impulse);
+            rb.AddForce(Vector3.right * 10f, ForceMode.Impulse);
         }
     }
 }

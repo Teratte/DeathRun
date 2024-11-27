@@ -7,8 +7,8 @@ public class ButtonController : MonoBehaviour
     public KeyCode activationKey = KeyCode.E; // 작동 키 설정
     public float activationRange = 1.0f; // 작동 가능한 최대 거리
     private bool isActivated = false; // 버튼의 작동 상태
-    private Renderer buttonRenderer;
-    private Rigidbody rb;
+    private Renderer buttonRenderer; // 색상 설정
+    private Rigidbody rb; // RigidBody
 
     void Start()
     {
