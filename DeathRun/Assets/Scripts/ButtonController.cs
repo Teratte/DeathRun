@@ -5,7 +5,7 @@ public class ButtonController : MonoBehaviour
     public GameObject obstacle; // 연결할 장애물
     public Transform player; // 플레이어의 Transform
     public KeyCode activationKey = KeyCode.E; // 작동 키 설정
-    public float activationRange = 3.0f; // 작동 가능한 최대 거리
+    public float activationRange = 0.3f; // 작동 가능한 최대 거리
     private bool isActivated = false; // 버튼의 작동 상태
     private Renderer buttonRenderer;
 
