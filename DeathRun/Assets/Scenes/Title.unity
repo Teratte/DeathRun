@@ -393,6 +393,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chatMessage: 
+  playerPrefabName: TempPlayer
+  inGameScene: 1
   LobbyCanvas: {fileID: 0}
   TitlePanel: {fileID: 683371469}
   CreateRoomPanel: {fileID: 559953494}
