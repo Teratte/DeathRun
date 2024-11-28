@@ -405,7 +405,7 @@ MonoBehaviour:
   PwPanel: {fileID: 1465106831}
   PwErrorLog: {fileID: 127737128}
   PwConfirmBtn: {fileID: 138321852}
-  PwPanelCloseBtn: {fileID: 0}
+  PwPanelCloseBtn: {fileID: 1287204244}
   PwCheckIF: {fileID: 442453564}
   LockState: 0
   privateroom: 

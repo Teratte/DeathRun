@@ -14,6 +14,7 @@ public class TempPlayerCtrl : MonoBehaviourPun, IPunObservable
         pv.ObservedComponents[0] = this;
 
         playerName.text = pv.IsMine ? PhotonNetwork.NickName : pv.Owner.NickName;
+        gameObject.tag = pv.IsMine ? (string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] : (string)pv.Owner.CustomProperties["PlayerTag"];
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
