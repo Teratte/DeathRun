@@ -14,4 +14,10 @@ namespace Define
         IDNotFound,
         PasswordNotFound,
     }
+
+    public enum Scenes
+    {
+        Title, 
+        InGame,
+    }
 }

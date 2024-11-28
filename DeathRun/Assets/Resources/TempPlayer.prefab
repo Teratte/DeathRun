@@ -111,6 +111,7 @@ GameObject:
   - component: {fileID: 3523950579387591188}
   - component: {fileID: 7407576371948519233}
   - component: {fileID: 3715452337453841411}
+  - component: {fileID: 2517066624510843097}
   m_Layer: 0
   m_Name: TempPlayer
   m_TagString: Untagged
@@ -227,7 +228,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5714690662698918401}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Script: {fileID: 11500000, guid: bd9b2868a5613084d9878428b9ebdbe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ObservedComponentsFoldoutOpen: 1
@@ -235,9 +236,25 @@ MonoBehaviour:
   prefixField: -1
   Synchronization: 3
   OwnershipTransfer: 0
-  observableSearch: 2
+  observableSearch: 0
   ObservedComponents:
-  - {fileID: 7407576371948519233}
+  - {fileID: 2517066624510843097}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &2517066624510843097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5714690662698918401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1957104a9cfcd5646a33463318595edd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1

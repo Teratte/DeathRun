@@ -9,7 +9,6 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PhotonInit : MonoBehaviourPunCallbacks
 {
-    // �̱��� ������ ������ �ؾ� ��
     public static PhotonInit instance;
 
     bool isGameStart = false;
@@ -18,6 +17,9 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     string playerName = "";
     public string chatMessage;
     PhotonView pv;
+
+    [SerializeField] private string playerPrefabName = "Player";
+    [SerializeField] private Define.Scenes inGameScene = Define.Scenes.InGame;
 
     [Header("LobbyCanvas")] public GameObject LobbyCanvas;
     public GameObject TitlePanel;
@@ -124,8 +126,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         isLoggIn = true;
         PlayerPrefs.SetInt("LogIn", 1);
 
-        //SceneManager.LoadScene("SampleScene");
-        PhotonNetwork.LoadLevel("SampleScene");
+        PhotonNetwork.LoadLevel(inGameScene.ToString());
     }
 
     private void OnApplicationQuit()
@@ -138,7 +139,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         if (PlayerPrefs.GetInt("LogIn") == 1)
             isLoggIn = true;
 
-        if (isGameStart == false && SceneManager.GetActiveScene().name == "SampleScene" && isLoggIn == true)
+        if (isGameStart == false && SceneManager.GetActiveScene().name == inGameScene.ToString() && isLoggIn == true)
         {
             Debug.Log("Update :" + isGameStart + ", " + isLoggIn);
             isGameStart = true;
@@ -154,11 +155,10 @@ public class PhotonInit : MonoBehaviourPunCallbacks
             yield return new WaitForSeconds(0.5f);
         }
 
-        GameObject tempPlayer = PhotonNetwork.Instantiate("TempPlayer",
+        GameObject tempPlayer = PhotonNetwork.Instantiate(playerPrefabName,
                                     new Vector3(0, 0, 0),
                                     Quaternion.identity,
                                     0);
-        tempPlayer.GetComponent<TempPlayerCtrl>().SetPlayerName(playerName); //플레이어 이름 할당
         pv = GetComponent<PhotonView>();
 
         yield return null;
@@ -168,8 +168,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     {
         if (isGameStart == false && isLoggIn == false)
         {
-            playerName = _playerName;
-            PhotonNetwork.LocalPlayer.NickName = playerName;
+            PhotonNetwork.LocalPlayer.NickName = _playerName;
             Connect();
 
         }

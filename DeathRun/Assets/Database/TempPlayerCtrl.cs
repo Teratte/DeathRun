@@ -8,28 +8,16 @@ public class TempPlayerCtrl : MonoBehaviourPun, IPunObservable
     [SerializeField] TextMesh playerName;
     private PhotonView pv;
 
-    private void Start()
+    private void Awake()
     {
         pv = GetComponent<PhotonView>();
         pv.ObservedComponents[0] = this;
+
+        playerName.text = pv.IsMine ? PhotonNetwork.NickName : pv.Owner.NickName;
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        if (stream.IsWriting)
-        {
-            stream.SendNext(playerName.text);
-        }
-        else
-        {
 
-            SetPlayerName((string)stream.ReceiveNext());
-
-        }
-    }
-
-    public void SetPlayerName(string _playerName)
-    {
-        playerName.text = _playerName;
     }
 }
