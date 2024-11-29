@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -8985,6 +8985,10 @@ PrefabInstance:
       propertyPath: PwPanelCloseBtn
       value: 
       objectReference: {fileID: 1287204244}
+    - target: {fileID: 2588852030260703526, guid: 3fcb848ce7ae8e149ab23976c4868d02, type: 3}
+      propertyPath: playerPrefabName
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 2588852030260703526, guid: 3fcb848ce7ae8e149ab23976c4868d02, type: 3}
       propertyPath: CellBtn.Array.data[0]
       value: 

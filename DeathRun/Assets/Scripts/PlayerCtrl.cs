@@ -1,17 +1,24 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerCtrl : MonoBehaviour
+public class PlayerCtrl : MonoBehaviour, IPunObservable
 {
+    //Added================================================
+    [SerializeField] TextMesh playerName;
+    private PhotonView pv;
+    private Vector3 currPos;
+    private Quaternion currRot;
+    //=====================================================
     private float h = 0f;
     private float v = 0f;
 
-    private float smoothH = 0f; // ºÎµå·¯¿î Horizontal °ª
-    private float smoothV = 0f; // ºÎµå·¯¿î Vertical °ª
+    private float smoothH = 0f; // ï¿½Îµå·¯ï¿½ï¿½ Horizontal ï¿½ï¿½
+    private float smoothV = 0f; // ï¿½Îµå·¯ï¿½ï¿½ Vertical ï¿½ï¿½
 
-    private float hVelocity = 0f; // Horizontal º¸°£¿ë ¼Óµµ
-    private float vVelocity = 0f; // Vertical º¸°£¿ë ¼Óµµ
+    private float hVelocity = 0f; // Horizontal ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½
+    private float vVelocity = 0f; // Vertical ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½
 
     private Transform tr;
     private Rigidbody rb;
@@ -22,7 +29,7 @@ public class PlayerCtrl : MonoBehaviour
     public GameObject PlayerBody;
     public GameObject PlayerArm;
 
-    public GameObject hitbox; // È÷Æ®¹Ú½º ¿ÀºêÁ§Æ® ¿¬°á
+    public GameObject hitbox; // ï¿½ï¿½Æ®ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 
     public float speed = 10f;
     public float rotSpeed = 800f;
@@ -33,12 +40,17 @@ public class PlayerCtrl : MonoBehaviour
     private bool isGrounded = false;
     public float mouseSensitivity = 2f;
 
-    public int maxHealth = 100; // ÃÖ´ë Ã¼·Â
-    private int currentHealth; // ÇöÀç Ã¼·Â
-    private bool isDead = false; // »ç¸Á »óÅÂ È®ÀÎ
+    public int maxHealth = 100; // ï¿½Ö´ï¿½ Ã¼ï¿½ï¿½
+    private int currentHealth; // ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½ï¿½
+    private bool isDead = false; // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 
     void Start()
     {
+        pv = GetComponent<PhotonView>();
+        pv.ObservedComponents[0] = this;
+        playerName.text = pv.IsMine ? PhotonNetwork.NickName : pv.Owner.NickName;
+        gameObject.tag = pv.IsMine ? (string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] : (string)pv.Owner.CustomProperties["PlayerTag"];
+
         tr = GetComponent<Transform>();
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
@@ -46,61 +58,86 @@ public class PlayerCtrl : MonoBehaviour
         SetLayerRecursively(PlayerBody, LayerMask.NameToLayer("LocalPlayerBody"));
         SetLayerRecursively(PlayerArm, LayerMask.NameToLayer("Default"));
 
-        currentHealth = maxHealth; // Ã¼·Â ÃÊ±âÈ­
+        currentHealth = maxHealth; // Ã¼ï¿½ï¿½ ï¿½Ê±ï¿½È­
 
         if (hitbox != null)
         {
-            hitbox.SetActive(false); // È÷Æ®¹Ú½º ºñÈ°¼ºÈ­
+            hitbox.SetActive(false); // ï¿½ï¿½Æ®ï¿½Ú½ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­
+        }
+
+        if (!pv.IsMine)
+        {
+            gameObject.GetComponentInChildren<Camera>().enabled = false;
         }
     }
 
     void Update()
     {
-        if (isDead) return; // »ç¸Á »óÅÂ¸é ¾÷µ¥ÀÌÆ® Á¾·á
+        if (isDead) return; // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 
-        h = Input.GetAxisRaw("Horizontal");
-        v = Input.GetAxisRaw("Vertical");
-
-        smoothH = Mathf.SmoothDamp(smoothH, h, ref hVelocity, 0.1f);
-        smoothV = Mathf.SmoothDamp(smoothV, v, ref vVelocity, 0.1f);
-
-        Vector3 moveDir = (Vector3.forward * v) + (Vector3.right * h);
-        tr.Translate(moveDir.normalized * Time.deltaTime * speed);
-
-        RotatePlayer();
-        RotateCamera();
-
-        isGrounded = CheckGrounded();
-
-        if (isGrounded && Input.GetButtonDown("Jump"))
+        if (pv.IsMine)
         {
-            animator.SetTrigger("Jump"); // Á¡ÇÁ ¾Ö´Ï¸ÞÀÌ¼Ç ½ÇÇà
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            h = Input.GetAxisRaw("Horizontal");
+            v = Input.GetAxisRaw("Vertical");
+
+            smoothH = Mathf.SmoothDamp(smoothH, h, ref hVelocity, 0.1f);
+            smoothV = Mathf.SmoothDamp(smoothV, v, ref vVelocity, 0.1f);
+
+            Vector3 moveDir = (Vector3.forward * v) + (Vector3.right * h);
+            tr.Translate(moveDir.normalized * Time.deltaTime * speed);
+
+            RotatePlayer();
+            RotateCamera();
+
+            isGrounded = CheckGrounded();
+
+            if (isGrounded && Input.GetButtonDown("Jump"))
+            {
+                animator.SetTrigger("Jump"); // ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
+
+            if (Input.GetButtonDown("Fire1"))
+            {
+                Attack(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            }
+
+            if (!isGrounded && rb.velocity.y < 0)
+            {
+                animator.SetBool("IsFalling", true); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½
+            }
+            else
+            {
+                animator.SetBool("IsFalling", false); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½È¯
+            }
+
+            if (moveDir.magnitude > 0)
+            {
+                animator.SetFloat("Speed", 1.0f);
+                animator.SetFloat("Vertical", smoothV);
+                animator.SetFloat("Horizontal", smoothH);
+            }
+            else
+            {
+                animator.SetFloat("Speed", 0.0f);
+            }
         }
+        else if(!pv.IsMine)
+        {
+            if (tr.position != currPos)
+            {
+                animator.SetFloat("Speed", 1.0f);
+                tr.position = Vector3.Lerp(tr.position, currPos, Time.deltaTime * 10.0f);
+            }
+            else
+            {
+                animator.SetFloat("Speed", 0.0f);
+            }
 
-        if (Input.GetButtonDown("Fire1"))
-        {
-            Attack(); // °ø°Ý ½ÇÇà
-        }
-
-        if (!isGrounded && rb.velocity.y < 0)
-        {
-            animator.SetBool("IsFalling", true); // ¶³¾îÁö´Â ¾Ö´Ï¸ÞÀÌ¼Ç ½ÇÇà
-        }
-        else
-        {
-            animator.SetBool("IsFalling", false); // ÂøÁö »óÅÂ·Î ÀüÈ¯
-        }
-
-        if (moveDir.magnitude > 0)
-        {
-            animator.SetFloat("Speed", 1.0f);
-            animator.SetFloat("Vertical", smoothV);
-            animator.SetFloat("Horizontal", smoothH);
-        }
-        else
-        {
-            animator.SetFloat("Speed", 0.0f);
+            if (tr.rotation != currRot)
+            {
+                tr.rotation = Quaternion.Lerp(tr.rotation, currRot, Time.deltaTime * 10.0f);
+            }
         }
     }
 
@@ -200,7 +237,7 @@ public class PlayerCtrl : MonoBehaviour
     private IEnumerator EnableHitbox()
     {
         hitbox.SetActive(true);
-        yield return new WaitForSeconds(0.5f); // È÷Æ®¹Ú½º È°¼ºÈ­ ½Ã°£
+        yield return new WaitForSeconds(0.5f); // ï¿½ï¿½Æ®ï¿½Ú½ï¿½ È°ï¿½ï¿½È­ ï¿½Ã°ï¿½
         hitbox.SetActive(false);
     }
 
@@ -211,8 +248,22 @@ public class PlayerCtrl : MonoBehaviour
             PlayerCtrl targetPlayer = other.GetComponent<PlayerCtrl>();
             if (targetPlayer != null)
             {
-                targetPlayer.TakeDamage(10); // ´Ù¸¥ ÇÃ·¹ÀÌ¾î¿¡°Ô 10 µ¥¹ÌÁö
+                targetPlayer.TakeDamage(10); // ï¿½Ù¸ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î¿¡ï¿½ï¿½ 10 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             }
+        }
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(tr.position);
+            stream.SendNext(tr.rotation);
+        }
+        else
+        {
+            currPos = (Vector3)stream.ReceiveNext();
+            currRot = (Quaternion)stream.ReceiveNext();
         }
     }
 }

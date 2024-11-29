@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     void Awake()
     {
+        Screen.SetResolution(1920 / 2, 1080 / 2, false);
+
         if (instance != null && instance != this)
         {
             Destroy(gameObject);

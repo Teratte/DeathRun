@@ -48,8 +48,6 @@ public class PhotonInit : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
-        Screen.SetResolution(1920, 1080, false);
-
         PhotonNetwork.GameVersion = "MyFps";
         PhotonNetwork.ConnectUsingSettings();
 
