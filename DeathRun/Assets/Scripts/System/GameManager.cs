@@ -14,7 +14,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     private GridLayoutGroup progressGridLayoutGroup;
     private Image[] savePointImages;
 
-    private float limitedTime;  //게임의 제한시간
+    private float limitedTime;
     private bool isGameStart = false;
 
     private static GameManager instance;
@@ -50,11 +50,6 @@ public class GameManager : MonoBehaviourPunCallbacks
             instance = this;
             DontDestroyOnLoad(gameObject);  
         }
-
-        GameObject _timeText = GameObject.Find(timeTextUIName);
-        GameObject _hpBar = GameObject.Find(hpBarUIName);
-        GameObject _Progress = GameObject.Find(progressUIName);
-        Init(_timeText, _hpBar, _Progress);
 
         isGameStart = false;
     }
@@ -124,15 +119,26 @@ public class GameManager : MonoBehaviourPunCallbacks
         hpBarSlider.value = hpRatio;
     }
 
-    public void SetSavePoint(int pointNum)
+    public void SetPointsHUD(Image savePointImage, int num)
     {
-        int targetIndex = savePointImages.Length - pointNum;
+        for(int i = 1; i < num; i++)
+        {
+            Image image = GameObject.Instantiate(savePointImage, progressGridLayoutGroup.transform);
+            image.name = $"SavePoint{i}";
+        }
 
-        //테스트 코드
-        savePointImages[pointNum].color = Color.black;
+        savePointImages = progressGridLayoutGroup.GetComponentsInChildren<Image>();
     }
 
-    public void Init(GameObject _timeText, GameObject _hpBar, GameObject _Progress)
+    public void SetSavePointHUD(int pointNum)
+    {
+        for(int i = 0; i <= pointNum; i++)
+        {
+            savePointImages[i].color = Color.blue;
+        }
+    }
+
+    public void HUDInit(GameObject _timeText, GameObject _hpBar, GameObject _Progress)
     {
         
         if(_timeText != null) timeText = _timeText.GetComponent<Text>();
@@ -141,13 +147,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         if( _hpBar != null ) hpBarSlider = _hpBar.GetComponent<Slider>();
 
         
-        if (_Progress != null)
-        {
-            progressGridLayoutGroup = _Progress.GetComponent<GridLayoutGroup>();
-            savePointImages = progressGridLayoutGroup.GetComponentsInChildren<Image>();
-        }
+        if (_Progress != null) progressGridLayoutGroup = _Progress.GetComponent<GridLayoutGroup>();
 
-        //게임 시작 처리
         isGameStart = true;
         LockCursor();
     }
