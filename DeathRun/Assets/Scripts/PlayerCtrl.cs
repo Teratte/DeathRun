@@ -1,14 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.Animations.Rigging;
 using UnityEngine;
+using System.Collections;
 
 public class PlayerCtrl : MonoBehaviour
 {
     private float h = 0f;
     private float v = 0f;
 
-    private float smoothH = 0f; // 부드러운 Horizontal 값
-    private float smoothV = 0f; // 부드러운 Vertical 값
+    private float smoothH = 0f;
+    private float smoothV = 0f;
 
     private float hVelocity = 0f; // Horizontal 보간용 속도
     private float vVelocity = 0f; // Vertical 보간용 속도
@@ -18,9 +18,11 @@ public class PlayerCtrl : MonoBehaviour
     private Animator animator;
 
     public Transform cameraArm;
+    public Transform[] spine;
     public Transform mainCamera;
-    public GameObject PlayerBody;
-    public GameObject PlayerArm;
+    public GameObject playerBody;
+    public GameObject playerArm;
+    public Animator armAnimator;
 
     public GameObject hitbox; // 히트박스 오브젝트 연결
 
@@ -37,20 +39,29 @@ public class PlayerCtrl : MonoBehaviour
     private int currentHealth; // 현재 체력
     private bool isDead = false; // 사망 상태 확인
 
+    private bool isAttackOnCooldown = false; // 공격 쿨타임 관리
+    public float attackCooldown = 0.5f; // 쿨타임 시간
+
     void Start()
     {
         tr = GetComponent<Transform>();
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
 
-        SetLayerRecursively(PlayerBody, LayerMask.NameToLayer("LocalPlayerBody"));
-        SetLayerRecursively(PlayerArm, LayerMask.NameToLayer("Default"));
+        SetLayerRecursively(playerBody, LayerMask.NameToLayer("LocalPlayerBody"));
+        SetLayerRecursively(playerArm, LayerMask.NameToLayer("Default"));
 
         currentHealth = maxHealth; // 체력 초기화
 
         if (hitbox != null)
         {
             hitbox.SetActive(false); // 히트박스 비활성화
+        }
+
+        RigBuilder rigBuilder = GetComponent<RigBuilder>();
+        if (rigBuilder != null)
+        {
+            rigBuilder.Build();
         }
     }
 
@@ -68,7 +79,16 @@ public class PlayerCtrl : MonoBehaviour
         tr.Translate(moveDir.normalized * Time.deltaTime * speed);
 
         RotatePlayer();
-        RotateCamera();
+
+        // 카메라 Y축
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+
+        cameraArm.Rotate(Vector3.left * mouseY);
+
+        Vector3 clampedRotation = cameraArm.localEulerAngles;
+        if (clampedRotation.x > 180f) clampedRotation.x -= 360f;
+        clampedRotation.x = Mathf.Clamp(clampedRotation.x, -80f, 80f);
+        cameraArm.localEulerAngles = new Vector3(clampedRotation.x, 0f, 0f);
 
         isGrounded = CheckGrounded();
 
@@ -108,18 +128,6 @@ public class PlayerCtrl : MonoBehaviour
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         tr.Rotate(Vector3.up * mouseX);
-    }
-
-    private void RotateCamera()
-    {
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
-
-        cameraArm.Rotate(Vector3.left * mouseY);
-
-        Vector3 clampedRotation = cameraArm.localEulerAngles;
-        if (clampedRotation.x > 180f) clampedRotation.x -= 360f;
-        clampedRotation.x = Mathf.Clamp(clampedRotation.x, -80f, 80f);
-        cameraArm.localEulerAngles = new Vector3(clampedRotation.x, 0f, 0f);
     }
 
     private bool CheckGrounded()
@@ -189,12 +197,14 @@ public class PlayerCtrl : MonoBehaviour
 
     private void Attack()
     {
-        Debug.Log("Player attacking!");
+        if (isAttackOnCooldown) return; // 쿨타임 중에는 공격 실행 불가
 
-        if (hitbox != null)
-        {
-            StartCoroutine(EnableHitbox());
-        }
+        isAttackOnCooldown = true; // 공격 중
+        animator.SetTrigger("Attack");
+        armAnimator.SetTrigger("Attack");
+
+        StartCoroutine(EnableHitbox());
+        StartCoroutine(AttackCooldown());
     }
 
     private IEnumerator EnableHitbox()
@@ -204,13 +214,21 @@ public class PlayerCtrl : MonoBehaviour
         hitbox.SetActive(false);
     }
 
+    private IEnumerator AttackCooldown()
+    {
+        yield return new WaitForSeconds(attackCooldown); // 쿨타임 대기
+        isAttackOnCooldown = false; // 쿨타임 해제
+    }
+
     private void OnTriggerEnter(Collider other)
     {
-        if (hitbox.activeSelf && other.CompareTag("Player"))
+        if (hitbox.activeSelf && other.CompareTag("Killer"))
         {
+            Debug.Log("Hit");
             PlayerCtrl targetPlayer = other.GetComponent<PlayerCtrl>();
             if (targetPlayer != null)
             {
+                Debug.Log("TakeDamage");
                 targetPlayer.TakeDamage(10); // 다른 플레이어에게 10 데미지
             }
         }
