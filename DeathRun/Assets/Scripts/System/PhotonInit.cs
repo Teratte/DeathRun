@@ -9,7 +9,6 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PhotonInit : MonoBehaviourPunCallbacks
 {
-    // �̱��� ������ ������ �ؾ� ��
     public static PhotonInit instance;
 
     bool isGameStart = false;
@@ -18,6 +17,9 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     string playerName = "";
     public string chatMessage;
     PhotonView pv;
+
+    [SerializeField] private string playerPrefabName = "Player";
+    [SerializeField] private Define.Scenes inGameScene = Define.Scenes.InGame;
 
     [Header("LobbyCanvas")] public GameObject LobbyCanvas;
     public GameObject TitlePanel;
@@ -41,10 +43,11 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     List<RoomInfo> myList = new List<RoomInfo>();
     int currentPage = 1, maxPage, multiple, roomnumber;
 
+    private const string TracerExistence = "TracerExistence";
+    private const int TracerNum = 0;
+
     private void Awake()
     {
-        Screen.SetResolution(960, 540, false);
-
         PhotonNetwork.GameVersion = "MyFps";
         PhotonNetwork.ConnectUsingSettings();
 
@@ -124,8 +127,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         isLoggIn = true;
         PlayerPrefs.SetInt("LogIn", 1);
 
-        //SceneManager.LoadScene("SampleScene");
-        PhotonNetwork.LoadLevel("SampleScene");
+        PhotonNetwork.LoadLevel(inGameScene.ToString());
     }
 
     private void OnApplicationQuit()
@@ -138,7 +140,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         if (PlayerPrefs.GetInt("LogIn") == 1)
             isLoggIn = true;
 
-        if (isGameStart == false && SceneManager.GetActiveScene().name == "SampleScene" && isLoggIn == true)
+        if (isGameStart == false && SceneManager.GetActiveScene().name == inGameScene.ToString() && isLoggIn == true)
         {
             Debug.Log("Update :" + isGameStart + ", " + isLoggIn);
             isGameStart = true;
@@ -154,11 +156,10 @@ public class PhotonInit : MonoBehaviourPunCallbacks
             yield return new WaitForSeconds(0.5f);
         }
 
-        GameObject tempPlayer = PhotonNetwork.Instantiate("TempPlayer",
+        GameObject tempPlayer = PhotonNetwork.Instantiate(playerPrefabName,
                                     new Vector3(0, 0, 0),
                                     Quaternion.identity,
                                     0);
-        tempPlayer.GetComponent<TempPlayerCtrl>().SetPlayerName(playerName); //플레이어 이름 할당
         pv = GetComponent<PhotonView>();
 
         yield return null;
@@ -168,8 +169,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     {
         if (isGameStart == false && isLoggIn == false)
         {
-            playerName = _playerName;
-            PhotonNetwork.LocalPlayer.NickName = playerName;
+            PhotonNetwork.LocalPlayer.NickName = _playerName;
             Connect();
 
         }
@@ -188,7 +188,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     public void CreateRoom()
     {
         PhotonNetwork.CreateRoom(NewRoomNameIF.text == "" ? "Game" + Random.Range(0, 20) : NewRoomNameIF.text,
-               new RoomOptions { MaxPlayers = 20 });
+               new RoomOptions { MaxPlayers = 4 });
         TitlePanel.SetActive(false);
     }
 
@@ -207,22 +207,36 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     public void CreateNewRoom()
     {
         RoomOptions roomOptions = new RoomOptions();
-        roomOptions.MaxPlayers = 20;
+        roomOptions.MaxPlayers = 4;
         roomOptions.CustomRoomProperties = new Hashtable()
         {
-            {"password", NewRoomPwInput.text}
+            {"password", NewRoomPwInput.text},
+            {TracerExistence, false},
         };
-        roomOptions.CustomRoomPropertiesForLobby = new string[] { "password" };
+        roomOptions.CustomRoomPropertiesForLobby = new string[] { "password", TracerExistence };
+
+        if (Random.Range(0, 3) == TracerNum)
+        {
+            Hashtable playerCustomProperties = new Hashtable { { "PlayerTag", "Tracer" } };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+            roomOptions.CustomRoomProperties[TracerExistence] = true;
+        }
+        else
+        {
+            Hashtable playerCustomProperties = new Hashtable { { "PlayerTag", "Player" } };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+        }
 
         if (PwToggle.isOn)
-        {
+        { 
             PhotonNetwork.CreateRoom(NewRoomNameIF.text == "" ? "Game" + Random.Range(0, 20) : "*" + NewRoomNameIF.text,
                 roomOptions);
         }
         else
         {
+            roomOptions.CustomRoomProperties.Remove("password");
             PhotonNetwork.CreateRoom(NewRoomNameIF.text == "" ? "Game" + Random.Range(0, 20) : NewRoomNameIF.text,
-                new RoomOptions { MaxPlayers = 20 });
+                roomOptions);
         }
 
         CreateRoomPanel.SetActive(false);
@@ -248,7 +262,39 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         }
         else
         {
+            Hashtable customProperties = myList[multiple + num].CustomProperties;
+
+            if((bool)customProperties[TracerExistence] == false)
+            {
+                if (myList[multiple + num].PlayerCount == myList[multiple + num].MaxPlayers - 1)
+                {
+                    Hashtable playerCustomProperties = new Hashtable { { "PlayerTag", "Tracer" } };
+                    PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+                    myList[multiple + num].CustomProperties[TracerExistence] = true;
+                }
+                else
+                {
+                    if (Random.Range(0, 3) == TracerNum)
+                    {
+                        Hashtable playerCustomProperties = new Hashtable { { "PlayerTag", "Tracer" } };
+                        PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+                        myList[multiple + num].CustomProperties[TracerExistence] = true;
+                    }
+                    else
+                    {
+                        Hashtable playerCustomProperties = new Hashtable { { "PlayerTag", "Player" } };
+                        PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+                    }
+                }
+            }
+            else
+            {
+                Hashtable playerCustomProperties = new Hashtable { { "PlayerTag", "Player" } };
+                PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+            }
+
             PhotonNetwork.JoinRoom(myList[multiple + num].Name);
+
             MyListRenewal();
 
         }
@@ -281,6 +327,32 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     {
         if ((string)myList[multiple + roomnumber].CustomProperties["password"] == PwCheckIF.text)
         {
+            Hashtable customProperties = myList[multiple + roomnumber].CustomProperties;
+
+            if ((bool)customProperties[TracerExistence] == false)
+            {
+                if (myList[multiple + roomnumber].PlayerCount == myList[multiple + roomnumber].MaxPlayers - 1)
+                {
+                    Hashtable playerCustomProperties = new Hashtable { { "PlayerTag", "Tracer" } };
+                    PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+                    myList[multiple + roomnumber].CustomProperties[TracerExistence] = true;
+                }
+                else
+                {
+                    if (Random.Range(0, 3) == TracerNum)
+                    {
+                        Hashtable playerCustomProperties = new Hashtable { { "PlayerTag", "Tracer" } };
+                        PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+                        myList[multiple + roomnumber].CustomProperties[TracerExistence] = true;
+                    }
+                    else
+                    {
+                        Hashtable playerCustomProperties = new Hashtable { { "PlayerTag", "Player" } };
+                        PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+                    }
+                }
+            }
+
             PhotonNetwork.JoinRoom(myList[multiple + roomnumber].Name);
             MyListRenewal();
             PwPanel.SetActive(false);

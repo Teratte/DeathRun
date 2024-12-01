@@ -5,9 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
-  - Weapon
-  - Cloth
-  - Killer
+  - Tracer
   layers:
   - Default
   - TransparentFX

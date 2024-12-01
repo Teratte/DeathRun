@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2058986845050078092
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1832252290599875690}
+  - component: {fileID: 2588852030260703526}
+  m_Layer: 0
+  m_Name: PhotonManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1832252290599875690
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2058986845050078092}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 527.69556, y: 272.48505, z: -283.873}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2588852030260703526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2058986845050078092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccfcce3cc6ab54b41869d8b8589a02e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chatMessage: 
+  playerPrefabName: TempPlayer
+  inGameScene: 1
+  LobbyCanvas: {fileID: 0}
+  TitlePanel: {fileID: 0}
+  CreateRoomPanel: {fileID: 0}
+  RoomPanel: {fileID: 0}
+  NewRoomNameIF: {fileID: 0}
+  NewRoomPwInput: {fileID: 0}
+  PwToggle: {fileID: 0}
+  PwPanel: {fileID: 0}
+  PwErrorLog: {fileID: 0}
+  PwConfirmBtn: {fileID: 0}
+  PwPanelCloseBtn: {fileID: 0}
+  PwCheckIF: {fileID: 0}
+  LockState: 0
+  privateroom: 
+  CellBtn:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  PreviousBtn: {fileID: 0}
+  NextBtn: {fileID: 0}
+  NickName: {fileID: 0}
