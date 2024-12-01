@@ -1,9 +1,14 @@
-using UnityEngine.Animations.Rigging;
-using UnityEngine;
+using Photon.Pun;
 using System.Collections;
+using UnityEngine;
 
-public class PlayerCtrl : MonoBehaviour
+public class PlayerCtrl : MonoBehaviour, IPunObservable
 {
+    [SerializeField] TextMesh playerName;
+    private PhotonView pv; // PhotonView
+    private Vector3 currPos;
+    private Quaternion currRot;
+
     private float h = 0f;
     private float v = 0f;
 
@@ -44,12 +49,16 @@ public class PlayerCtrl : MonoBehaviour
 
     void Start()
     {
+
+        pv = GetComponent<PhotonView>();
+        pv.ObservedComponents[0] = this;
+        playerName.text = pv.IsMine ? PhotonNetwork.NickName : pv.Owner.NickName;
+        gameObject.tag = pv.IsMine ? (string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] : (string)pv.Owner.CustomProperties["PlayerTag"];
+
+        pv = GetComponent<PhotonView>(); // PhotonView 가져오기
         tr = GetComponent<Transform>();
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-
-        SetLayerRecursively(playerBody, LayerMask.NameToLayer("LocalPlayerBody"));
-        SetLayerRecursively(playerArm, LayerMask.NameToLayer("Default"));
 
         currentHealth = maxHealth; // 체력 초기화
 
@@ -58,10 +67,16 @@ public class PlayerCtrl : MonoBehaviour
             hitbox.SetActive(false); // 히트박스 비활성화
         }
 
-        RigBuilder rigBuilder = GetComponent<RigBuilder>();
-        if (rigBuilder != null)
+        if (!pv.IsMine)
         {
-            rigBuilder.Build();
+            // 로컬 플레이어가 아니면 카메라 비활성화
+            gameObject.GetComponentInChildren<Camera>().enabled = false;
+            
+        }
+        else
+        {
+            SetLayerRecursively(playerBody, LayerMask.NameToLayer("LocalPlayerBody"));
+            SetLayerRecursively(playerArm, LayerMask.NameToLayer("Default"));
         }
     }
 
@@ -69,58 +84,78 @@ public class PlayerCtrl : MonoBehaviour
     {
         if (isDead) return; // 사망 상태면 업데이트 종료
 
-        h = Input.GetAxisRaw("Horizontal");
-        v = Input.GetAxisRaw("Vertical");
-
-        smoothH = Mathf.SmoothDamp(smoothH, h, ref hVelocity, 0.1f);
-        smoothV = Mathf.SmoothDamp(smoothV, v, ref vVelocity, 0.1f);
-
-        Vector3 moveDir = (Vector3.forward * v) + (Vector3.right * h);
-        tr.Translate(moveDir.normalized * Time.deltaTime * speed);
-
-        RotatePlayer();
-
-        // 카메라 Y축
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
-
-        cameraArm.Rotate(Vector3.left * mouseY);
-
-        Vector3 clampedRotation = cameraArm.localEulerAngles;
-        if (clampedRotation.x > 180f) clampedRotation.x -= 360f;
-        clampedRotation.x = Mathf.Clamp(clampedRotation.x, -80f, 80f);
-        cameraArm.localEulerAngles = new Vector3(clampedRotation.x, 0f, 0f);
-
-        isGrounded = CheckGrounded();
-
-        if (isGrounded && Input.GetButtonDown("Jump"))
+        if (pv.IsMine)
         {
-            animator.SetTrigger("Jump"); // 점프 애니메이션 실행
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            h = Input.GetAxisRaw("Horizontal");
+            v = Input.GetAxisRaw("Vertical");
+
+            smoothH = Mathf.SmoothDamp(smoothH, h, ref hVelocity, 0.1f);
+            smoothV = Mathf.SmoothDamp(smoothV, v, ref vVelocity, 0.1f);
+
+            Vector3 moveDir = (Vector3.forward * v) + (Vector3.right * h);
+            tr.Translate(moveDir.normalized * Time.deltaTime * speed);
+
+            RotatePlayer();
+
+            // 카메라 Y축
+            float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+
+            cameraArm.Rotate(Vector3.left * mouseY);
+
+            Vector3 clampedRotation = cameraArm.localEulerAngles;
+            if (clampedRotation.x > 180f) clampedRotation.x -= 360f;
+            clampedRotation.x = Mathf.Clamp(clampedRotation.x, -80f, 80f);
+            cameraArm.localEulerAngles = new Vector3(clampedRotation.x, 0f, 0f);
+
+            isGrounded = CheckGrounded();
+
+            if (isGrounded && Input.GetButtonDown("Jump"))
+            {
+                animator.SetTrigger("Jump"); // 점프 애니메이션 실행
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
+
+            if (Input.GetButtonDown("Fire1"))
+            {
+                Attack(); // 공격 실행
+            }
+
+            if (!isGrounded && rb.velocity.y < 0)
+            {
+                animator.SetBool("IsFalling", true); // 떨어지는 애니메이션 실행
+            }
+            else
+            {
+                animator.SetBool("IsFalling", false); // 착지 상태로 전환
+            }
+
+            if (moveDir.magnitude > 0)
+            {
+                animator.SetFloat("Speed", 1.0f);
+                animator.SetFloat("Vertical", smoothV);
+                animator.SetFloat("Horizontal", smoothH);
+            }
+            else
+            {
+                animator.SetFloat("Speed", 0.0f);
+            }
         }
+        else if (!pv.IsMine)
+        {
+            if (tr.position != currPos)
+            {
+                animator.SetFloat("Speed", 1.0f);
+                tr.position = Vector3.Lerp(tr.position, currPos, Time.deltaTime * 10.0f);
+            }
+            else
+            {
+                animator.SetFloat("Speed", 0.0f);
+            }
 
-        if (Input.GetButtonDown("Fire1"))
-        {
-            Attack(); // 공격 실행
-        }
-
-        if (!isGrounded && rb.velocity.y < 0)
-        {
-            animator.SetBool("IsFalling", true); // 떨어지는 애니메이션 실행
-        }
-        else
-        {
-            animator.SetBool("IsFalling", false); // 착지 상태로 전환
-        }
-
-        if (moveDir.magnitude > 0)
-        {
-            animator.SetFloat("Speed", 1.0f);
-            animator.SetFloat("Vertical", smoothV);
-            animator.SetFloat("Horizontal", smoothH);
-        }
-        else
-        {
-            animator.SetFloat("Speed", 0.0f);
+            if (tr.rotation != currRot)
+            {
+                tr.rotation = Quaternion.Lerp(tr.rotation, currRot, Time.deltaTime * 10.0f);
+            }
         }
     }
 
@@ -145,56 +180,6 @@ public class PlayerCtrl : MonoBehaviour
         return false;
     }
 
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckDistance);
-    }
-
-    void SetLayerRecursively(GameObject obj, int bodyLayer)
-    {
-        obj.layer = bodyLayer;
-        foreach (Transform child in obj.transform)
-        {
-            SetLayerRecursively(child.gameObject, bodyLayer);
-        }
-    }
-
-    public void TakeDamage(int damage)
-    {
-        if (isDead) return;
-
-        currentHealth -= damage;
-
-        Debug.Log($"Player Health: {currentHealth}");
-
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
-    }
-
-    private void Die()
-    {
-        isDead = true;
-        animator.SetTrigger("Die");
-
-        Debug.Log("Player is dead!");
-
-        this.enabled = false;
-        rb.velocity = Vector3.zero;
-        Invoke("Respawn", 3f);
-    }
-
-    private void Respawn()
-    {
-        isDead = false;
-        currentHealth = maxHealth;
-        this.enabled = true;
-        transform.position = Vector3.zero;
-        Debug.Log("Player respawned!");
-    }
-
     private void Attack()
     {
         if (isAttackOnCooldown) return; // 쿨타임 중에는 공격 실행 불가
@@ -205,6 +190,9 @@ public class PlayerCtrl : MonoBehaviour
 
         StartCoroutine(EnableHitbox());
         StartCoroutine(AttackCooldown());
+
+        // 히트박스 동기화
+        pv.RPC("EnableHitboxRPC", RpcTarget.Others);
     }
 
     private IEnumerator EnableHitbox()
@@ -220,17 +208,32 @@ public class PlayerCtrl : MonoBehaviour
         isAttackOnCooldown = false; // 쿨타임 해제
     }
 
-    private void OnTriggerEnter(Collider other)
+    void SetLayerRecursively(GameObject obj, int bodyLayer)
     {
-        if (hitbox.activeSelf && other.CompareTag("Killer"))
+        obj.layer = bodyLayer;
+        foreach (Transform child in obj.transform)
         {
-            Debug.Log("Hit");
-            PlayerCtrl targetPlayer = other.GetComponent<PlayerCtrl>();
-            if (targetPlayer != null)
-            {
-                Debug.Log("TakeDamage");
-                targetPlayer.TakeDamage(10); // 다른 플레이어에게 10 데미지
-            }
+            SetLayerRecursively(child.gameObject, bodyLayer);
+        }
+    }
+
+    [PunRPC]
+    private void EnableHitboxRPC()
+    {
+        StartCoroutine(EnableHitbox());
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(tr.position);
+            stream.SendNext(tr.rotation);
+        }
+        else
+        {
+            currPos = (Vector3)stream.ReceiveNext();
+            currRot = (Quaternion)stream.ReceiveNext();
         }
     }
 }
