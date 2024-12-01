@@ -1,6 +1,8 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class ObstacleController : MonoBehaviour
+public class FireObstacle : MonoBehaviour, IObstacle
 {
     private Rigidbody rb;
     private Renderer obstacleRenderer;
