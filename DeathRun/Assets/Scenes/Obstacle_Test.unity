@@ -874,10 +874,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ch01_nonPBR
       objectReference: {fileID: 0}
-    - target: {fileID: 2887839361441590828, guid: 58fbee9df66dea24eb4c70bc56f28361, type: 3}
-      propertyPath: m_TagString
-      value: MainCamera
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
