@@ -40,6 +40,10 @@ MonoBehaviour:
   - Fire
   - RespawnSpaceship
   - EnableHitboxRPC
+  - RPC_Activate
+  - RPC_ActivateButton
+  - RPC_StartMovingObstacle
+  - RPC_Deactivate
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
