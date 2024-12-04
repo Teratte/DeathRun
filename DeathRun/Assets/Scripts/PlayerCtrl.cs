@@ -236,4 +236,57 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
             currRot = (Quaternion)stream.ReceiveNext();
         }
     }
+
+    public void TakeDamage(int damage)
+    {
+        if (isDead) return;
+
+        currentHealth -= damage;
+
+        Debug.Log($"Player Health: {currentHealth}");
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+    private void Die()
+    {
+        isDead = true;
+        animator.SetTrigger("Die");
+
+        Debug.Log("Player is dead!");
+
+        this.enabled = false;
+        rb.velocity = Vector3.zero;
+        Invoke("Respawn", 3f);
+    }
+
+    private void Respawn()
+    {
+        isDead = false;
+        currentHealth = maxHealth;
+        this.enabled = true;
+        transform.position = Vector3.zero;
+        Debug.Log("Player respawned!");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        //if (hitbox.activeSelf && other.CompareTag("Tracer"))
+        //{
+        //    Debug.Log("Hit");
+        //    PlayerCtrl targetPlayer = other.GetComponent<PlayerCtrl>();
+        //    if (targetPlayer != null)
+        //    {
+        //        Debug.Log("TakeDamage");
+        //        targetPlayer.TakeDamage(10); // 다른 플레이어에게 10 데미지
+        //    }
+        //}
+
+        //if(other.CompareTag("Dead_Obs"))
+        //{
+        //    TakeDamage(100);
+        //}
+    }
 }
