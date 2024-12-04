@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,13 +9,16 @@ public class LevelData : MonoBehaviour
     const string timeTextUIName = "TimeTxt";
     const string hpBarUIName = "HpBar";
     const string progressUIName = "Progress";
+    private bool isGameStart = false;
 
+    [SerializeField] private int startPlayerCount;
     [SerializeField] private float LimitTime;
 
-    [SerializeField] private GameObject[] savePoints;
-    [SerializeField] private Image savePointImage;
+    public GameObject[] savePoints;
+    public Image savePointImage;
 
     private static LevelData instance;
+    
     public static LevelData Instance
     {
         get
@@ -31,17 +35,19 @@ public class LevelData : MonoBehaviour
     public void Awake()
     {
         instance = this;
+
+        isGameStart = false;
     }
 
-    private void Start()
+    private void Update()
     {
-        GameManager.Instance.SetLimitedTime(LimitTime);
+        if (FindObjectsOfType<PlayerCtrl>().Length >= startPlayerCount && isGameStart == false && PhotonNetwork.IsMasterClient)
+        {
+            isGameStart = true;
 
-        GameObject _timeText = GameObject.Find(timeTextUIName);
-        GameObject _hpBar = GameObject.Find(hpBarUIName);
-        GameObject _Progress = GameObject.Find(progressUIName);
-        GameManager.Instance.HUDInit(_timeText, _hpBar, _Progress);
-        GameManager.Instance.SetPointsHUD(savePointImage, savePoints.Length);
+            //GameManager.Instance.SetPointsHUD(savePointImage, savePoints.Length);
+            GameManager.Instance.GameStart(LimitTime);
+        }
     }
 
     public void SetSavePoint(GameObject savePoint)

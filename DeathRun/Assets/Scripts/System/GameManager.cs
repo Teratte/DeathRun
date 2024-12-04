@@ -1,9 +1,11 @@
 using Photon.Pun;
+using Photon.Realtime;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 
-public class GameManager : MonoBehaviourPunCallbacks
+public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
 {
     const string timeTextUIName = "TimeTxt";
     const string hpBarUIName = "HpBar";
@@ -14,28 +16,31 @@ public class GameManager : MonoBehaviourPunCallbacks
     private GridLayoutGroup progressGridLayoutGroup;
     private Image[] savePointImages;
 
-    private float limitedTime;
+    private float overTime;
     private bool isGameStart = false;
+
+    private PhotonView pv;
 
     private static GameManager instance;
     public static GameManager Instance
     {
-        get 
+        get
         {
             if (instance != null)
             {
                 return instance;
             }
 
-            instance = FindObjectOfType<GameManager>();
-
-            if (instance == null)
+            if (instance == null && PhotonNetwork.IsMasterClient)
             {
-                GameObject singletonObject = new GameObject("GameManager");
-                instance = singletonObject.AddComponent<GameManager>();
+                GameObject singletonObject = PhotonNetwork.Instantiate("GameManager", Vector3.zero, Quaternion.identity);
+                return singletonObject.GetComponent<GameManager>();
             }
-
-            return instance;
+            else
+            {
+                instance = FindObjectOfType<GameManager>();
+                return instance;
+            }
         }
     }
 
@@ -48,13 +53,16 @@ public class GameManager : MonoBehaviourPunCallbacks
         else
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);  
+            DontDestroyOnLoad(gameObject);
         }
+
+        pv = gameObject.GetComponent<PhotonView>();
+        pv.ObservedComponents[0] = this;
 
         isGameStart = false;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         DecreaseTime();
     }
@@ -71,9 +79,28 @@ public class GameManager : MonoBehaviourPunCallbacks
         Cursor.visible = false;
     }
 
-    public void SetLimitedTime(float time)
+    public void GameStart(float limitTime)
     {
-        limitedTime = time;
+        if (PhotonNetwork.IsMasterClient)
+        {
+            pv.RPC("SetStart", RpcTarget.All, limitTime);
+        }
+    }
+
+    [PunRPC]
+    private void SetStart(float limitTime)
+    {
+        timeText = GameObject.Find(timeTextUIName).GetComponent<Text>();
+        hpBarSlider = GameObject.Find(hpBarUIName).GetComponent<Slider>();
+        progressGridLayoutGroup = GameObject.Find(progressUIName).GetComponent<GridLayoutGroup>();
+        for (int i = 1; i < LevelData.Instance.savePoints.Length; i++)
+        {
+            Image image = GameObject.Instantiate(LevelData.Instance.savePointImage, progressGridLayoutGroup.transform);
+            image.name = $"SavePoint{i}";
+        }
+        savePointImages = progressGridLayoutGroup.GetComponentsInChildren<Image>();
+
+        overTime = limitTime;
 
         isGameStart = true;
     }
@@ -85,15 +112,15 @@ public class GameManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        limitedTime -= Time.deltaTime;
+        overTime -= Time.fixedDeltaTime;
 
-        int minute = (int)(limitedTime / 60f);
-        int second = (int)(limitedTime % 60f);
+        int minute = (int)(overTime / 60f);
+        int second = (int)(overTime % 60f);
 
         string minuteText = minute.ToString();
         string secondText = second.ToString();
 
-        if(minute < 10)
+        if (minute < 10)
         {
             minuteText = $"0{minuteText}";
         }
@@ -105,7 +132,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         timeText.text = $"{minuteText} : {secondText}";
 
-        if(limitedTime <= 0.0f)
+        if (overTime <= 0.0f)
         {
             timeText.text = "00 : 00";
             isGameStart = false;
@@ -119,37 +146,16 @@ public class GameManager : MonoBehaviourPunCallbacks
         hpBarSlider.value = hpRatio;
     }
 
-    public void SetPointsHUD(Image savePointImage, int num)
-    {
-        for(int i = 1; i < num; i++)
-        {
-            Image image = GameObject.Instantiate(savePointImage, progressGridLayoutGroup.transform);
-            image.name = $"SavePoint{i}";
-        }
-
-        savePointImages = progressGridLayoutGroup.GetComponentsInChildren<Image>();
-    }
-
     public void SetSavePointHUD(int pointNum)
     {
-        for(int i = 0; i <= pointNum; i++)
+        for (int i = 0; i <= pointNum; i++)
         {
             savePointImages[i].color = Color.blue;
         }
     }
 
-    public void HUDInit(GameObject _timeText, GameObject _hpBar, GameObject _Progress)
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        
-        if(_timeText != null) timeText = _timeText.GetComponent<Text>();
 
-        
-        if( _hpBar != null ) hpBarSlider = _hpBar.GetComponent<Slider>();
-
-        
-        if (_Progress != null) progressGridLayoutGroup = _Progress.GetComponent<GridLayoutGroup>();
-
-        isGameStart = true;
-        LockCursor();
     }
 }

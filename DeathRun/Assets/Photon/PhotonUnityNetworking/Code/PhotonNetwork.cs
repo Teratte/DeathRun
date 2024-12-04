@@ -808,7 +808,7 @@ namespace Photon.Pun
         {
             get
             {
-                if (OfflineMode)
+                 if (OfflineMode)
                 {
                     return true;
                 }
