@@ -52,7 +52,15 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
         pv = GetComponent<PhotonView>();
         pv.ObservedComponents[0] = this;
-        playerName.text = pv.IsMine ? PhotonNetwork.NickName : pv.Owner.NickName;
+        if(pv.IsMine)
+        {
+            playerName.text = PhotonNetwork.NickName;
+            playerName.gameObject.SetActive(false);
+        }
+        else
+        {
+            playerName.text = pv.Owner.NickName;
+        }
         gameObject.tag = pv.IsMine ? (string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] : (string)pv.Owner.CustomProperties["PlayerTag"];
 
         pv = GetComponent<PhotonView>(); // PhotonView ��������
@@ -157,6 +165,8 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
                 tr.rotation = Quaternion.Lerp(tr.rotation, currRot, Time.deltaTime * 10.0f);
             }
         }
+
+        playerName.transform.LookAt(playerName.transform.position + Camera.main.transform.forward);
     }
 
     private void RotatePlayer()
@@ -235,5 +245,58 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
             currPos = (Vector3)stream.ReceiveNext();
             currRot = (Quaternion)stream.ReceiveNext();
         }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (isDead) return;
+
+        currentHealth -= damage;
+
+        Debug.Log($"Player Health: {currentHealth}");
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+    private void Die()
+    {
+        isDead = true;
+        animator.SetTrigger("Die");
+
+        Debug.Log("Player is dead!");
+
+        this.enabled = false;
+        rb.velocity = Vector3.zero;
+        Invoke("Respawn", 3f);
+    }
+
+    private void Respawn()
+    {
+        isDead = false;
+        currentHealth = maxHealth;
+        this.enabled = true;
+        transform.position = Vector3.zero;
+        Debug.Log("Player respawned!");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        //if (hitbox.activeSelf && other.CompareTag("Tracer"))
+        //{
+        //    Debug.Log("Hit");
+        //    PlayerCtrl targetPlayer = other.GetComponent<PlayerCtrl>();
+        //    if (targetPlayer != null)
+        //    {
+        //        Debug.Log("TakeDamage");
+        //        targetPlayer.TakeDamage(10); // �ٸ� �÷��̾�� 10 ������
+        //    }
+        //}
+
+        //if(other.CompareTag("Dead_Obs"))
+        //{
+        //    TakeDamage(100);
+        //}
     }
 }

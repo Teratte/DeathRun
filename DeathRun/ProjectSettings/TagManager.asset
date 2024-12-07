@@ -8,7 +8,6 @@ TagManager:
   - Tracer
   - Weapon
   - Cloth
-  - Killer
   - Dead_Obs
   - Tick_Obs
   layers:
