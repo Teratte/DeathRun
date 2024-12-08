@@ -47,7 +47,8 @@ MonoBehaviour:
   - RPC_DestroyTrap
   - RPC_StartFalling
   - RPC_DestroyPlatform
-
+  - 
+  - SetStart
   DisableAutoOpenWizard: 1
-  ShowSettings: 1
-  DevRegionSetOnce: 1
+  ShowSettings: 0
+  DevRegionSetOnce: 0

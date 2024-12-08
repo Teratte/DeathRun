@@ -410,6 +410,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e919158d94136614ea3ed1a22c3e34a8, type: 3}
+--- !u!1 &607310827 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 288401723563784590, guid: dac80abea7033ff47af36ed57d57afd2, type: 3}
+  m_PrefabInstance: {fileID: 8011065463635345093}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &921300513
 GameObject:
   m_ObjectHideFlags: 0
@@ -863,20 +868,20 @@ PrefabInstance:
       objectReference: {fileID: 1895008526}
     - target: {fileID: 3344293436568927699, guid: 64b2ea974f7279344871e8e96a3da95a, type: 3}
       propertyPath: obstacles.Array.size
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3344293436568927699, guid: 64b2ea974f7279344871e8e96a3da95a, type: 3}
       propertyPath: obstacles.Array.data[0]
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 386042130}
     - target: {fileID: 3344293436568927699, guid: 64b2ea974f7279344871e8e96a3da95a, type: 3}
       propertyPath: obstacles.Array.data[1]
       value: 
-      objectReference: {fileID: 1368105439}
+      objectReference: {fileID: 607310827}
     - target: {fileID: 3344293436568927699, guid: 64b2ea974f7279344871e8e96a3da95a, type: 3}
       propertyPath: obstacles.Array.data[2]
       value: 
-      objectReference: {fileID: 386042130}
+      objectReference: {fileID: 1368105439}
     - target: {fileID: 6624175926637703840, guid: 64b2ea974f7279344871e8e96a3da95a, type: 3}
       propertyPath: m_Name
       value: Obs_Button
