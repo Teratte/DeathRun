@@ -1105,7 +1105,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.6490273, y: 3.2999997, z: -1.2589734}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4850706543977954170}
@@ -1207,9 +1207,9 @@ MonoBehaviour:
   playerArm: {fileID: 1598746418616649847}
   armAnimator: {fileID: 873103643116091541}
   hitbox: {fileID: 544065740086052519}
-  speed: 5
+  speed: 4
   rotSpeed: 800
-  jumpForce: 5
+  jumpForce: 6
   groundCheckDistance: 0.1
   mouseSensitivity: 2
   maxHealth: 100
