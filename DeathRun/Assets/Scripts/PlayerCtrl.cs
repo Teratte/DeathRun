@@ -15,8 +15,8 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
     private float smoothH = 0f;
     private float smoothV = 0f;
 
-    private float hVelocity = 0f; // Horizontal º¸°£¿ë ¼Óµµ
-    private float vVelocity = 0f; // Vertical º¸°£¿ë ¼Óµµ
+    private float hVelocity = 0f; // Horizontal ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½
+    private float vVelocity = 0f; // Vertical ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½
 
     private Transform tr;
     private Rigidbody rb;
@@ -29,7 +29,7 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
     public GameObject playerArm;
     public Animator armAnimator;
 
-    public GameObject hitbox; // È÷Æ®¹Ú½º ¿ÀºêÁ§Æ® ¿¬°á
+    public GameObject hitbox; // ï¿½ï¿½Æ®ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 
     public float speed = 10f;
     public float rotSpeed = 800f;
@@ -40,36 +40,44 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
     private bool isGrounded = false;
     public float mouseSensitivity = 2f;
 
-    public int maxHealth = 100; // ÃÖ´ë Ã¼·Â
-    private int currentHealth; // ÇöÀç Ã¼·Â
-    private bool isDead = false; // »ç¸Á »óÅÂ È®ÀÎ
+    public int maxHealth = 100; // ï¿½Ö´ï¿½ Ã¼ï¿½ï¿½
+    private int currentHealth; // ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½ï¿½
+    private bool isDead = false; // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 
-    private bool isAttackOnCooldown = false; // °ø°Ý ÄðÅ¸ÀÓ °ü¸®
-    public float attackCooldown = 0.5f; // ÄðÅ¸ÀÓ ½Ã°£
+    private bool isAttackOnCooldown = false; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public float attackCooldown = 0.5f; // ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ã°ï¿½
 
     void Start()
     {
 
         pv = GetComponent<PhotonView>();
         pv.ObservedComponents[0] = this;
-        playerName.text = pv.IsMine ? PhotonNetwork.NickName : pv.Owner.NickName;
+        if(pv.IsMine)
+        {
+            playerName.text = PhotonNetwork.NickName;
+            playerName.gameObject.SetActive(false);
+        }
+        else
+        {
+            playerName.text = pv.Owner.NickName;
+        }
         gameObject.tag = pv.IsMine ? (string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] : (string)pv.Owner.CustomProperties["PlayerTag"];
 
-        pv = GetComponent<PhotonView>(); // PhotonView °¡Á®¿À±â
+        pv = GetComponent<PhotonView>(); // PhotonView ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         tr = GetComponent<Transform>();
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
 
-        currentHealth = maxHealth; // Ã¼·Â ÃÊ±âÈ­
+        currentHealth = maxHealth; // Ã¼ï¿½ï¿½ ï¿½Ê±ï¿½È­
 
         if (hitbox != null)
         {
-            hitbox.SetActive(false); // È÷Æ®¹Ú½º ºñÈ°¼ºÈ­
+            hitbox.SetActive(false); // ï¿½ï¿½Æ®ï¿½Ú½ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­
         }
 
         if (!pv.IsMine)
         {
-            // ·ÎÄÃ ÇÃ·¹ÀÌ¾î°¡ ¾Æ´Ï¸é Ä«¸Þ¶ó ºñÈ°¼ºÈ­
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½Æ´Ï¸ï¿½ Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­
             gameObject.GetComponentInChildren<Camera>().enabled = false;
             
         }
@@ -82,7 +90,7 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
     void Update()
     {
-        if (isDead) return; // »ç¸Á »óÅÂ¸é ¾÷µ¥ÀÌÆ® Á¾·á
+        if (isDead) return; // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 
         if (pv.IsMine)
         {
@@ -97,7 +105,7 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
             RotatePlayer();
 
-            // Ä«¸Þ¶ó YÃà
+            // Ä«ï¿½Þ¶ï¿½ Yï¿½ï¿½
             float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
             cameraArm.Rotate(Vector3.left * mouseY);
@@ -111,22 +119,22 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
             if (isGrounded && Input.GetButtonDown("Jump"))
             {
-                animator.SetTrigger("Jump"); // Á¡ÇÁ ¾Ö´Ï¸ÞÀÌ¼Ç ½ÇÇà
+                animator.SetTrigger("Jump"); // ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             }
 
             if (Input.GetButtonDown("Fire1"))
             {
-                Attack(); // °ø°Ý ½ÇÇà
+                Attack(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             }
 
             if (!isGrounded && rb.velocity.y < 0)
             {
-                animator.SetBool("IsFalling", true); // ¶³¾îÁö´Â ¾Ö´Ï¸ÞÀÌ¼Ç ½ÇÇà
+                animator.SetBool("IsFalling", true); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½
             }
             else
             {
-                animator.SetBool("IsFalling", false); // ÂøÁö »óÅÂ·Î ÀüÈ¯
+                animator.SetBool("IsFalling", false); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½È¯
             }
 
             if (moveDir.magnitude > 0)
@@ -157,6 +165,8 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
                 tr.rotation = Quaternion.Lerp(tr.rotation, currRot, Time.deltaTime * 10.0f);
             }
         }
+
+        playerName.transform.LookAt(playerName.transform.position + Camera.main.transform.forward);
     }
 
     private void RotatePlayer()
@@ -182,30 +192,30 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
     private void Attack()
     {
-        if (isAttackOnCooldown) return; // ÄðÅ¸ÀÓ Áß¿¡´Â °ø°Ý ½ÇÇà ºÒ°¡
+        if (isAttackOnCooldown) return; // ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ß¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ò°ï¿½
 
-        isAttackOnCooldown = true; // °ø°Ý Áß
+        isAttackOnCooldown = true; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
         animator.SetTrigger("Attack");
         armAnimator.SetTrigger("Attack");
 
         StartCoroutine(EnableHitbox());
         StartCoroutine(AttackCooldown());
 
-        // È÷Æ®¹Ú½º µ¿±âÈ­
+        // ï¿½ï¿½Æ®ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
         pv.RPC("EnableHitboxRPC", RpcTarget.Others);
     }
 
     private IEnumerator EnableHitbox()
     {
         hitbox.SetActive(true);
-        yield return new WaitForSeconds(0.5f); // È÷Æ®¹Ú½º È°¼ºÈ­ ½Ã°£
+        yield return new WaitForSeconds(0.5f); // ï¿½ï¿½Æ®ï¿½Ú½ï¿½ È°ï¿½ï¿½È­ ï¿½Ã°ï¿½
         hitbox.SetActive(false);
     }
 
     private IEnumerator AttackCooldown()
     {
-        yield return new WaitForSeconds(attackCooldown); // ÄðÅ¸ÀÓ ´ë±â
-        isAttackOnCooldown = false; // ÄðÅ¸ÀÓ ÇØÁ¦
+        yield return new WaitForSeconds(attackCooldown); // ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½
+        isAttackOnCooldown = false; // ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     }
 
     void SetLayerRecursively(GameObject obj, int bodyLayer)
@@ -235,5 +245,58 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
             currPos = (Vector3)stream.ReceiveNext();
             currRot = (Quaternion)stream.ReceiveNext();
         }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (isDead) return;
+
+        currentHealth -= damage;
+
+        Debug.Log($"Player Health: {currentHealth}");
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+    private void Die()
+    {
+        isDead = true;
+        animator.SetTrigger("Die");
+
+        Debug.Log("Player is dead!");
+
+        this.enabled = false;
+        rb.velocity = Vector3.zero;
+        Invoke("Respawn", 3f);
+    }
+
+    private void Respawn()
+    {
+        isDead = false;
+        currentHealth = maxHealth;
+        this.enabled = true;
+        transform.position = Vector3.zero;
+        Debug.Log("Player respawned!");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        //if (hitbox.activeSelf && other.CompareTag("Tracer"))
+        //{
+        //    Debug.Log("Hit");
+        //    PlayerCtrl targetPlayer = other.GetComponent<PlayerCtrl>();
+        //    if (targetPlayer != null)
+        //    {
+        //        Debug.Log("TakeDamage");
+        //        targetPlayer.TakeDamage(10); // ï¿½Ù¸ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î¿¡ï¿½ï¿½ 10 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        //    }
+        //}
+
+        //if(other.CompareTag("Dead_Obs"))
+        //{
+        //    TakeDamage(100);
+        //}
     }
 }
