@@ -352,6 +352,11 @@ public class PhotonInit : MonoBehaviourPunCallbacks
                     }
                 }
             }
+            else
+            {
+                Hashtable playerCustomProperties = new Hashtable { { "PlayerTag", "Player" } };
+                PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+            }
 
             PhotonNetwork.JoinRoom(myList[multiple + roomnumber].Name);
             MyListRenewal();

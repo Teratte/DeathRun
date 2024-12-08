@@ -159,6 +159,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5786037988883449190, guid: 8e36f32559ccd7d41a4d442a3fef98e9, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7391179471980211399, guid: 8e36f32559ccd7d41a4d442a3fef98e9, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -573,7 +577,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6895633013904105888, guid: ed87427ce0f065d4e94c5d451e756ba5, type: 3}
       propertyPath: LimitTime
-      value: 500
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6895633013904105888, guid: ed87427ce0f065d4e94c5d451e756ba5, type: 3}
       propertyPath: savePointImage
