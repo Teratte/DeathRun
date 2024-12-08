@@ -10,11 +10,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     const string timeTextUIName = "TimeTxt";
     const string hpBarUIName = "HpBar";
     const string progressUIName = "Progress";
+    const string winLosePanelName = "WinLosePanel";
 
     private Text timeText;
     private Slider hpBarSlider;
     private GridLayoutGroup progressGridLayoutGroup;
     private Image[] savePointImages;
+    private GameObject winLosePanel = null;
+    private Text winLoseText = null;
 
     private float overTime;
     private bool isGameStart = false;
@@ -62,6 +65,16 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         isGameStart = false;
     }
 
+    private void Update()
+    {
+        if(winLosePanel == null) winLosePanel = GameObject.Find(winLosePanelName);
+        if (winLoseText == null)
+        {
+            winLoseText = winLosePanel.GetComponentInChildren<Text>();
+            winLosePanel.SetActive(false);
+        }
+    }
+
     private void FixedUpdate()
     {
         DecreaseTime();
@@ -93,6 +106,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         timeText = GameObject.Find(timeTextUIName).GetComponent<Text>();
         hpBarSlider = GameObject.Find(hpBarUIName).GetComponent<Slider>();
         progressGridLayoutGroup = GameObject.Find(progressUIName).GetComponent<GridLayoutGroup>();
+
         for (int i = 1; i < LevelData.Instance.savePoints.Length; i++)
         {
             Image image = GameObject.Instantiate(LevelData.Instance.savePointImage, progressGridLayoutGroup.transform);
@@ -136,6 +150,16 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         {
             timeText.text = "00 : 00";
             isGameStart = false;
+            winLosePanel.SetActive(true);
+
+            if((string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] == "Player")
+            {
+                winLoseText.text = "LOSE...";
+            }
+            else
+            {
+                winLoseText.text = "WIN!!!";
+            }    
         }
     }
 

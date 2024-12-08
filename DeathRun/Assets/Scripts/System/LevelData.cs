@@ -32,11 +32,16 @@ public class LevelData : MonoBehaviour
         }
     }
 
-    public void Awake()
+    private void Awake()
     {
         instance = this;
 
         isGameStart = false;
+    }
+
+    private void Start()
+    {
+        if(PhotonNetwork.IsMasterClient) GameManager.Instance.enabled = true;
     }
 
     private void Update()
