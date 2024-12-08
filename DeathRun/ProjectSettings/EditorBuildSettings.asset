@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Title.unity
     guid: 8cf42e623ce098a46a00feffafc1313b
   - enabled: 1
+    path: Assets/Scenes/WoodLand.unity
+    guid: 483513895f96a334a96212493292d947
+  - enabled: 1
     path: Assets/Scenes/InGame.unity
     guid: b1bde1e8cd1d05848a6c6b98ead59580
   m_configObjects: {}

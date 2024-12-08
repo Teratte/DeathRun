@@ -18,6 +18,7 @@ namespace Define
     public enum Scenes
     {
         Title, 
+        WoodLand,
         InGame,
     }
 }

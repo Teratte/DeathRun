@@ -19,8 +19,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
     PhotonView pv;
 
     [SerializeField] private string playerPrefabName = "Player";
-    [SerializeField] private Define.Scenes inGameScene = Define.Scenes.InGame;
-
+    [SerializeField] private Define.Scenes woodLandScene = Define.Scenes.WoodLand;
     [Header("LobbyCanvas")] public GameObject LobbyCanvas;
     public GameObject TitlePanel;
     public GameObject CreateRoomPanel;
@@ -127,7 +126,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         isLoggIn = true;
         PlayerPrefs.SetInt("LogIn", 1);
 
-        PhotonNetwork.LoadLevel(inGameScene.ToString());
+        PhotonNetwork.LoadLevel(woodLandScene.ToString());
     }
 
     private void OnApplicationQuit()
@@ -140,7 +139,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         if (PlayerPrefs.GetInt("LogIn") == 1)
             isLoggIn = true;
 
-        if (isGameStart == false && SceneManager.GetActiveScene().name == inGameScene.ToString() && isLoggIn == true)
+        if (isGameStart == false && SceneManager.GetActiveScene().name == woodLandScene.ToString() && isLoggIn == true)
         {
             Debug.Log("Update :" + isGameStart + ", " + isLoggIn);
             isGameStart = true;
@@ -157,7 +156,7 @@ public class PhotonInit : MonoBehaviourPunCallbacks
         }
 
         GameObject tempPlayer = PhotonNetwork.Instantiate(playerPrefabName,
-                                    new Vector3(0, 0, 0),
+                                    new Vector3(-12, 9, -28),
                                     Quaternion.identity,
                                     0);
         pv = GetComponent<PhotonView>();
