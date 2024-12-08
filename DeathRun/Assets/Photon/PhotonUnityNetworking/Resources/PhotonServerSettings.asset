@@ -44,6 +44,9 @@ MonoBehaviour:
   - RPC_ActivateButton
   - RPC_StartMovingObstacle
   - RPC_Deactivate
+  - RPC_DestroyTrap
+  - RPC_StartFalling
+  - RPC_DestroyPlatform
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
