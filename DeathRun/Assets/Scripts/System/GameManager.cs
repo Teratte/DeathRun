@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
 
     private float overTime;
     private bool isGameStart = false;
+    private int LastSavePointIndex;
 
     private PhotonView pv;
 
@@ -170,12 +171,19 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         hpBarSlider.value = hpRatio;
     }
 
-    public void SetSavePointHUD(int pointNum)
+    public void SetSavePoint(int pointNum)
     {
         for (int i = 0; i <= pointNum; i++)
         {
             savePointImages[i].color = Color.blue;
         }
+
+        LastSavePointIndex = pointNum;
+    }
+
+    public void RespawnAtLastSavePoint(GameObject playerObject)
+    {
+        playerObject.transform.position = LevelData.Instance.savePoints[LastSavePointIndex].gameObject.transform.position;
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

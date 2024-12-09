@@ -61,7 +61,7 @@ public class LevelData : MonoBehaviour
         {
             if (savePoints[i] == savePoint)
             {
-                GameManager.Instance.SetSavePointHUD(i);
+                GameManager.Instance.SetSavePoint(i);
                 return;
             }
         }
