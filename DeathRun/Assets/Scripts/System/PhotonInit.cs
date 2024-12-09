@@ -155,10 +155,21 @@ public class PhotonInit : MonoBehaviourPunCallbacks
             yield return new WaitForSeconds(0.5f);
         }
 
-        GameObject tempPlayer = PhotonNetwork.Instantiate(playerPrefabName,
-                                    new Vector3(-12, 9, -28),
-                                    Quaternion.identity,
-                                    0);
+        if ((string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] == "Player")
+        {
+            GameObject tempPlayer = PhotonNetwork.Instantiate(playerPrefabName,
+                                        new Vector3(-12, 9, -28),
+                                        Quaternion.identity,
+                                        0);
+        }
+        else
+        {
+            GameObject tempPlayer = PhotonNetwork.Instantiate(playerPrefabName,
+                                        new Vector3(-13, 9, -41),
+                                        Quaternion.identity,
+                                        0);
+        }
+
         pv = GetComponent<PhotonView>();
 
         yield return null;

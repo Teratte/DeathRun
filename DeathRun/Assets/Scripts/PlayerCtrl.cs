@@ -79,7 +79,7 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
         {
             // ���� �÷��̾ �ƴϸ� ī�޶� ��Ȱ��ȭ
             gameObject.GetComponentInChildren<Camera>().enabled = false;
-            
+            gameObject.GetComponentInChildren<AudioListener>().enabled = false;
         }
         else
         {
