@@ -8,6 +8,8 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
     private PhotonView pv; // PhotonView
     private Vector3 currPos;
     private Quaternion currRot;
+    private Quaternion currArmRot;
+
 
     private float h = 0f;
     private float v = 0f;
@@ -23,7 +25,7 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
     private Animator animator;
 
     public Transform cameraArm;
-    public Transform[] spine;
+    //public Transform[] spine;
     public Transform mainCamera;
     public GameObject playerBody;
     public GameObject playerArm;
@@ -90,10 +92,11 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
     void Update()
     {
-        if (isDead) return; // ��� ���¸� ������Ʈ ����
+        if (isDead) return; // 플레이어가 죽었으면 동작 멈춤
 
         if (pv.IsMine)
         {
+            // 로컬 플레이어의 입력 처리
             h = Input.GetAxisRaw("Horizontal");
             v = Input.GetAxisRaw("Vertical");
 
@@ -105,9 +108,7 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
             RotatePlayer();
 
-            // ī�޶� Y��
             float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
-
             cameraArm.Rotate(Vector3.left * mouseY);
 
             Vector3 clampedRotation = cameraArm.localEulerAngles;
@@ -119,38 +120,40 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
             if (isGrounded && Input.GetButtonDown("Jump"))
             {
-                animator.SetTrigger("Jump"); // ���� �ִϸ��̼� ����
+                animator.SetTrigger("Jump");
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            }
-
-            if (Input.GetButtonDown("Fire1"))
-            {
-                Attack(); // ���� ����
+                pv.RPC("SyncTrigger", RpcTarget.Others, "Jump");
             }
 
             if (!isGrounded && rb.velocity.y < 0)
             {
-                animator.SetBool("IsFalling", true); // �������� �ִϸ��̼� ����
+                animator.SetBool("IsFalling", true);
+                pv.RPC("SyncBool", RpcTarget.Others, "IsFalling", true);
             }
             else
             {
-                animator.SetBool("IsFalling", false); // ���� ���·� ��ȯ
+                animator.SetBool("IsFalling", false);
+                pv.RPC("SyncBool", RpcTarget.Others, "IsFalling", false);
             }
 
             if (moveDir.magnitude > 0)
             {
                 animator.SetFloat("Speed", 1.0f);
-                animator.SetFloat("Vertical", smoothV);
+                pv.RPC("SyncFloat", RpcTarget.Others, "Speed", 1.0f);
                 animator.SetFloat("Horizontal", smoothH);
+                pv.RPC("SyncFloat", RpcTarget.Others, "Horizontal", smoothH);
+                animator.SetFloat("Vertical", smoothV);
+                pv.RPC("SyncFloat", RpcTarget.Others, "Vertical", smoothV);
             }
             else
             {
                 animator.SetFloat("Speed", 0.0f);
+                pv.RPC("SyncFloat", RpcTarget.Others, "Speed", 0.0f);
             }
         }
         else if (!pv.IsMine)
         {
-            if (tr.position != currPos)
+            if (Vector3.Distance(tr.position, currPos) > 0.03f)
             {
                 animator.SetFloat("Speed", 1.0f);
                 tr.position = Vector3.Lerp(tr.position, currPos, Time.deltaTime * 10.0f);
@@ -164,10 +167,16 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
             {
                 tr.rotation = Quaternion.Lerp(tr.rotation, currRot, Time.deltaTime * 10.0f);
             }
+
+            if (cameraArm.localRotation != currArmRot)
+            {
+                cameraArm.localRotation = Quaternion.Lerp(cameraArm.localRotation, currArmRot, Time.deltaTime * 10.0f);
+            }
         }
 
         playerName.transform.LookAt(playerName.transform.position + Camera.main.transform.forward);
     }
+
 
     private void RotatePlayer()
     {
@@ -239,13 +248,20 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
         {
             stream.SendNext(tr.position);
             stream.SendNext(tr.rotation);
+            stream.SendNext(cameraArm.localRotation);
+            stream.SendNext(animator.GetFloat("Speed"));
+            stream.SendNext(animator.GetBool("IsFalling"));
         }
         else
         {
             currPos = (Vector3)stream.ReceiveNext();
             currRot = (Quaternion)stream.ReceiveNext();
+            currArmRot = (Quaternion)stream.ReceiveNext(); 
+            animator.SetFloat("Speed", (float)stream.ReceiveNext());
+            animator.SetBool("IsFalling", (bool)stream.ReceiveNext());
         }
     }
+
 
     public void TakeDamage(int damage)
     {
@@ -299,4 +315,26 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
         //    TakeDamage(100);
         //}
     }
+
+    [PunRPC]
+    private void SyncTrigger(string triggerName)
+    {
+        animator.SetTrigger(triggerName);
+    }
+
+    [PunRPC]
+    private void SyncBool(string boolName, bool value)
+    {
+        animator.SetBool(boolName, value);
+    }
+
+    [PunRPC]
+    private void SyncFloat(string floatName, float value)
+    {
+        animator.SetFloat(floatName, value);
+    }
+
+
+
+
 }

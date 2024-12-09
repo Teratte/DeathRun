@@ -49,6 +49,9 @@ MonoBehaviour:
   - RPC_DestroyPlatform
   - 
   - SetStart
+  - SyncBool
+  - SyncFloat
+  - SyncTrigger
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
