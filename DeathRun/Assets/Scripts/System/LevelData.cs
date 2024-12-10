@@ -12,7 +12,7 @@ public class LevelData : MonoBehaviour
     private bool isGameStart = false;
 
     [SerializeField] private int startPlayerCount;
-    [SerializeField] private float LimitTime;
+    [SerializeField] private int LimitTime;
 
     public GameObject[] savePoints;
     public Image savePointImage;

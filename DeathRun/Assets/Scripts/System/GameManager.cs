@@ -1,6 +1,7 @@
 using Photon.Pun;
 using Photon.Realtime;
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,8 +20,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     private GameObject winLosePanel = null;
     private Text winLoseText = null;
 
-    private float overTime;
-    private bool isGameStart = false;
+    private int overTime;
     private int LastSavePointIndex;
 
     private PhotonView pv;
@@ -63,7 +63,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         pv = gameObject.GetComponent<PhotonView>();
         pv.ObservedComponents[0] = this;
 
-        isGameStart = false;
     }
 
     private void Update()
@@ -74,11 +73,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
             winLoseText = winLosePanel.GetComponentInChildren<Text>();
             winLosePanel.SetActive(false);
         }
-    }
-
-    private void FixedUpdate()
-    {
-        DecreaseTime();
     }
 
     public void UnlockCursor()
@@ -93,7 +87,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         Cursor.visible = false;
     }
 
-    public void GameStart(float limitTime)
+    public void GameStart(int limitTime)
     {
         if (PhotonNetwork.IsMasterClient)
         {
@@ -102,7 +96,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     [PunRPC]
-    private void SetStart(float limitTime)
+    private void SetStart(int limitTime)
     {
         timeText = GameObject.Find(timeTextUIName).GetComponent<Text>();
         hpBarSlider = GameObject.Find(hpBarUIName).GetComponent<Slider>();
@@ -116,51 +110,59 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         savePointImages = progressGridLayoutGroup.GetComponentsInChildren<Image>();
 
         overTime = limitTime;
-
-        isGameStart = true;
+        StartCoroutine("DecreaseTime");
     }
 
-    private void DecreaseTime()
+    private IEnumerator DecreaseTime()
     {
-        if (isGameStart == false)
+        while (true)
         {
-            return;
-        }
+            int minute = (int)(overTime / 60f);
+            int second = (int)(overTime % 60f);
 
-        overTime -= Time.fixedDeltaTime;
+            string minuteText = minute.ToString();
+            string secondText = second.ToString();
 
-        int minute = (int)(overTime / 60f);
-        int second = (int)(overTime % 60f);
-
-        string minuteText = minute.ToString();
-        string secondText = second.ToString();
-
-        if (minute < 10)
-        {
-            minuteText = $"0{minuteText}";
-        }
-
-        if (second < 10)
-        {
-            secondText = $"0{secondText}";
-        }
-
-        timeText.text = $"{minuteText} : {secondText}";
-
-        if (overTime <= 0.0f)
-        {
-            timeText.text = "00 : 00";
-            isGameStart = false;
-            winLosePanel.SetActive(true);
-
-            if((string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] == "Player")
+            if (minute < 10)
             {
-                winLoseText.text = "LOSE...";
+                minuteText = $"0{minuteText}";
+            }
+
+            if (second < 10)
+            {
+                secondText = $"0{secondText}";
+            }
+
+            if ((overTime % 60) == 0)
+            {
+                timeText.color = Color.red;
             }
             else
             {
-                winLoseText.text = "WIN!!!";
-            }    
+                timeText.color = Color.black;
+            }
+
+            timeText.text = $"{minuteText} : {secondText}";
+
+            if (overTime <= 0)
+            {
+                timeText.text = "00 : 00";
+                winLosePanel.SetActive(true);
+
+                if ((string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] == "Player")
+                {
+                    winLoseText.text = "LOSE...";
+                }
+                else
+                {
+                    winLoseText.text = "WIN!!!";
+                }
+
+                yield break;
+            }
+
+            yield return new WaitForSeconds(1.0f);
+            --overTime;
         }
     }
 
