@@ -621,6 +621,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ch01_nonPBR
       objectReference: {fileID: 0}
+    - target: {fileID: 1960901842007586643, guid: 58fbee9df66dea24eb4c70bc56f28361, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 8389163032880494505, guid: 58fbee9df66dea24eb4c70bc56f28361, type: 3}
       propertyPath: sceneViewId
       value: 1

@@ -287,6 +287,8 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
         isDead = true;
         animator.SetTrigger("Die");
 
+        pv.RPC("SyncTrigger", RpcTarget.Others, "Die");
+
         Debug.Log("Player is dead!");
 
         this.enabled = false;
@@ -300,6 +302,9 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
         currentHealth = maxHealth;
         this.enabled = true;
         transform.position = Vector3.zero;
+
+        animator.SetTrigger("Respawn");
+        pv.RPC("SyncTrigger", RpcTarget.Others, "Respawn");
         Debug.Log("Player respawned!");
     }
 
@@ -339,8 +344,4 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
     {
         animator.SetFloat(floatName, value);
     }
-
-
-
-
 }
