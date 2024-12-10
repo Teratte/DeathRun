@@ -118,6 +118,11 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
             isGrounded = CheckGrounded();
 
+            if (Input.GetButtonDown("Fire1"))
+            {
+                Attack(); 
+            }
+
             if (isGrounded && Input.GetButtonDown("Jump"))
             {
                 animator.SetTrigger("Jump");
@@ -212,6 +217,7 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
         // ��Ʈ�ڽ� ����ȭ
         pv.RPC("EnableHitboxRPC", RpcTarget.Others);
+        pv.RPC("SyncTrigger", RpcTarget.Others, "Attack");
     }
 
     private IEnumerator EnableHitbox()
