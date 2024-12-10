@@ -25,7 +25,7 @@ public class CheckHit : MonoBehaviour
             if (targetPlayer != null)
             {
                 Debug.Log("TakeDamage");
-                targetPlayer.TakeDamage(10); // ï¿½Ù¸ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î¿¡ï¿½ï¿½ 10 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                targetPlayer.TakeDamage(10); // ´Ù¸¥ ÇÃ·¹ÀÌ¾î¿¡°Ô 10 µ¥¹ÌÁö
             }
         }
     }

@@ -1,7 +1,6 @@
 using Photon.Pun;
 using Photon.Realtime;
 using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,8 +19,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     private GameObject winLosePanel = null;
     private Text winLoseText = null;
 
-    private int overTime;
-    private int LastSavePointIndex;
+    private float overTime;
+    private bool isGameStart = false;
 
     private PhotonView pv;
 
@@ -63,6 +62,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         pv = gameObject.GetComponent<PhotonView>();
         pv.ObservedComponents[0] = this;
 
+        isGameStart = false;
     }
 
     private void Update()
@@ -73,6 +73,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
             winLoseText = winLosePanel.GetComponentInChildren<Text>();
             winLosePanel.SetActive(false);
         }
+    }
+
+    private void FixedUpdate()
+    {
+        DecreaseTime();
     }
 
     public void UnlockCursor()
@@ -87,7 +92,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         Cursor.visible = false;
     }
 
-    public void GameStart(int limitTime)
+    public void GameStart(float limitTime)
     {
         if (PhotonNetwork.IsMasterClient)
         {
@@ -96,7 +101,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     [PunRPC]
-    private void SetStart(int limitTime)
+    private void SetStart(float limitTime)
     {
         timeText = GameObject.Find(timeTextUIName).GetComponent<Text>();
         hpBarSlider = GameObject.Find(hpBarUIName).GetComponent<Slider>();
@@ -110,59 +115,51 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         savePointImages = progressGridLayoutGroup.GetComponentsInChildren<Image>();
 
         overTime = limitTime;
-        StartCoroutine("DecreaseTime");
+
+        isGameStart = true;
     }
 
-    private IEnumerator DecreaseTime()
+    private void DecreaseTime()
     {
-        while (true)
+        if (isGameStart == false)
         {
-            int minute = (int)(overTime / 60f);
-            int second = (int)(overTime % 60f);
+            return;
+        }
 
-            string minuteText = minute.ToString();
-            string secondText = second.ToString();
+        overTime -= Time.fixedDeltaTime;
 
-            if (minute < 10)
+        int minute = (int)(overTime / 60f);
+        int second = (int)(overTime % 60f);
+
+        string minuteText = minute.ToString();
+        string secondText = second.ToString();
+
+        if (minute < 10)
+        {
+            minuteText = $"0{minuteText}";
+        }
+
+        if (second < 10)
+        {
+            secondText = $"0{secondText}";
+        }
+
+        timeText.text = $"{minuteText} : {secondText}";
+
+        if (overTime <= 0.0f)
+        {
+            timeText.text = "00 : 00";
+            isGameStart = false;
+            winLosePanel.SetActive(true);
+
+            if((string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] == "Player")
             {
-                minuteText = $"0{minuteText}";
-            }
-
-            if (second < 10)
-            {
-                secondText = $"0{secondText}";
-            }
-
-            if ((overTime % 60) == 0)
-            {
-                timeText.color = Color.red;
+                winLoseText.text = "LOSE...";
             }
             else
             {
-                timeText.color = Color.black;
-            }
-
-            timeText.text = $"{minuteText} : {secondText}";
-
-            if (overTime <= 0)
-            {
-                timeText.text = "00 : 00";
-                winLosePanel.SetActive(true);
-
-                if ((string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] == "Player")
-                {
-                    winLoseText.text = "LOSE...";
-                }
-                else
-                {
-                    winLoseText.text = "WIN!!!";
-                }
-
-                yield break;
-            }
-
-            yield return new WaitForSeconds(1.0f);
-            --overTime;
+                winLoseText.text = "WIN!!!";
+            }    
         }
     }
 
@@ -173,19 +170,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         hpBarSlider.value = hpRatio;
     }
 
-    public void SetSavePoint(int pointNum)
+    public void SetSavePointHUD(int pointNum)
     {
         for (int i = 0; i <= pointNum; i++)
         {
             savePointImages[i].color = Color.blue;
         }
-
-        LastSavePointIndex = pointNum;
-    }
-
-    public void RespawnAtLastSavePoint(GameObject playerObject)
-    {
-        playerObject.transform.position = LevelData.Instance.savePoints[LastSavePointIndex].gameObject.transform.position;
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
