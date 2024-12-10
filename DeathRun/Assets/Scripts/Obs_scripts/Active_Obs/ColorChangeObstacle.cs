@@ -9,6 +9,8 @@ public class ColorChangeObstacle : MonoBehaviour, IObstacle
     public float colorChangeDuration = 5f; // 색상과 태그 변경 지속 시간
     private Renderer floorRenderer;     // 바닥의 Renderer
     private bool isActivated = false;   // 장애물이 활성화되었는지 여부
+    [SerializeField]
+    private GameObject Tick_Obs;
 
     private PhotonView photonView;
 
@@ -16,6 +18,7 @@ public class ColorChangeObstacle : MonoBehaviour, IObstacle
     {
         photonView = GetComponent<PhotonView>();
         floorRenderer = GetComponent<Renderer>(); // 바닥의 Renderer 참조
+        Tick_Obs.SetActive(false);
     }
 
     public void Activate()
@@ -29,6 +32,8 @@ public class ColorChangeObstacle : MonoBehaviour, IObstacle
 
             // 태그 변경
             ChangeTag();
+
+            Chage_Tick_Obs_State();
 
             // 네트워크 동기화
             photonView.RPC("RPC_Activate", RpcTarget.OthersBuffered);
@@ -51,6 +56,8 @@ public class ColorChangeObstacle : MonoBehaviour, IObstacle
             // 태그 변경
             ChangeTag();
 
+            Chage_Tick_Obs_State();
+
             // 5초 후에 원래대로 돌아가는 코루틴 시작
             StartCoroutine(RevertChangesAfterDelay(colorChangeDuration));
         }
@@ -68,6 +75,17 @@ public class ColorChangeObstacle : MonoBehaviour, IObstacle
     {
         gameObject.tag = newTag; // 태그 변경
     }
+    private void Chage_Tick_Obs_State()
+    {
+        if(Tick_Obs.activeSelf)
+        {
+            Tick_Obs.SetActive(false);
+        }
+        else
+        {
+            Tick_Obs.SetActive(true);
+        }
+    }
 
     private IEnumerator RevertChangesAfterDelay(float delay)
     {
@@ -82,6 +100,8 @@ public class ColorChangeObstacle : MonoBehaviour, IObstacle
 
         // 태그 원래대로 복구
         gameObject.tag = "Ground";
+
+        Chage_Tick_Obs_State();
 
         // 네트워크 동기화
         photonView.RPC("RPC_Deactivate", RpcTarget.OthersBuffered);

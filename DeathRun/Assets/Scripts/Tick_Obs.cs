@@ -32,6 +32,31 @@ public class Tick_Obs : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            PlayerCtrl playerCtrl = collision.gameObject.GetComponent<PlayerCtrl>();
+            if (playerCtrl.GetComponent<PhotonView>().IsMine && !playersInTrigger.Contains(playerCtrl))
+            {
+                playersInTrigger.Add(playerCtrl);
+                StartCoroutine(ApplyDamage(playerCtrl));
+            }
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            PlayerCtrl playerCtrl = collision.gameObject.GetComponent<PlayerCtrl>();
+            if (playersInTrigger.Contains(playerCtrl))
+            {
+                playersInTrigger.Remove(playerCtrl);
+            }
+        }
+    }
+
     private IEnumerator ApplyDamage(PlayerCtrl playerCtrl)
     {
         while (playersInTrigger.Contains(playerCtrl))
