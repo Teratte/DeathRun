@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
 {
+    private bool isGameStart;
+
     const string timeTextUIName = "TimeTxt";
     const string hpBarUIName = "HpBar";
     const string progressUIName = "Progress";
@@ -110,6 +112,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         savePointImages = progressGridLayoutGroup.GetComponentsInChildren<Image>();
 
         overTime = limitTime;
+        isGameStart = true;
         StartCoroutine("DecreaseTime");
     }
 
@@ -117,6 +120,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     {
         while (true)
         {
+            if (isGameStart == false) yield break;
+
             int minute = (int)(overTime / 60f);
             int second = (int)(overTime % 60f);
 
@@ -191,5 +196,27 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
 
+    }
+
+    public void TracerDead()
+    {
+        pv.RPC("PlayerWin", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void PlayerWin()
+    {
+        isGameStart = false;
+
+        winLosePanel.SetActive(true);
+
+        if ((string)PhotonNetwork.LocalPlayer.CustomProperties["PlayerTag"] == "Player")
+        {
+            winLoseText.text = "WIN!!!";
+        }
+        else
+        {
+            winLoseText.text = "LOSE...";
+        }
     }
 }

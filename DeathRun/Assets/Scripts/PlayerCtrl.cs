@@ -293,7 +293,15 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
         this.enabled = false;
         rb.velocity = Vector3.zero;
-        Invoke("Respawn", 3f);
+
+        if (this.gameObject.CompareTag("Player"))
+        {
+            Invoke("Respawn", 3f);
+        }
+        else
+        {
+            GameManager.Instance.TracerDead();
+        }
     }
 
     private void Respawn()
