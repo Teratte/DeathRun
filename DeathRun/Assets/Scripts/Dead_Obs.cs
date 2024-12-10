@@ -17,4 +17,17 @@ public class Dead_Obs : MonoBehaviour
             }
         }
     }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            PlayerCtrl playerCtrl = other.gameObject.GetComponent<PlayerCtrl>();
+            if (playerCtrl.GetComponent<PhotonView>().IsMine)
+            {
+                playerCtrl.TakeDamage(100);
+
+            }
+        }
+    }
 }

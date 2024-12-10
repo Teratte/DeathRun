@@ -223,14 +223,14 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
     private IEnumerator EnableHitbox()
     {
         hitbox.SetActive(true);
-        yield return new WaitForSeconds(0.5f); // ��Ʈ�ڽ� Ȱ��ȭ �ð�
+        yield return new WaitForSeconds(0.5f); 
         hitbox.SetActive(false);
     }
 
     private IEnumerator AttackCooldown()
     {
-        yield return new WaitForSeconds(attackCooldown); // ��Ÿ�� ���
-        isAttackOnCooldown = false; // ��Ÿ�� ����
+        yield return new WaitForSeconds(attackCooldown); 
+        isAttackOnCooldown = false; 
     }
 
     void SetLayerRecursively(GameObject obj, int bodyLayer)
@@ -275,7 +275,7 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
 
         currentHealth -= damage;
 
-        Debug.Log($"Player Health: {currentHealth}");
+        GameManager.Instance.UpdateHpBar(maxHealth,currentHealth);
 
         if (currentHealth <= 0)
         {
@@ -300,31 +300,13 @@ public class PlayerCtrl : MonoBehaviour, IPunObservable
     {
         isDead = false;
         currentHealth = maxHealth;
+        GameManager.Instance.UpdateHpBar(maxHealth, currentHealth);
         this.enabled = true;
-        transform.position = Vector3.zero;
+        GameManager.Instance.RespawnAtLastSavePoint(this.gameObject);
 
         animator.SetTrigger("Respawn");
         pv.RPC("SyncTrigger", RpcTarget.Others, "Respawn");
         Debug.Log("Player respawned!");
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        //if (hitbox.activeSelf && other.CompareTag("Tracer"))
-        //{
-        //    Debug.Log("Hit");
-        //    PlayerCtrl targetPlayer = other.GetComponent<PlayerCtrl>();
-        //    if (targetPlayer != null)
-        //    {
-        //        Debug.Log("TakeDamage");
-        //        targetPlayer.TakeDamage(10); // �ٸ� �÷��̾�� 10 ������
-        //    }
-        //}
-
-        //if(other.CompareTag("Dead_Obs"))
-        //{
-        //    TakeDamage(100);
-        //}
     }
 
     [PunRPC]
